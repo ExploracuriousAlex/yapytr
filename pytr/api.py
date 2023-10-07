@@ -252,7 +252,7 @@ class TradeRepublicApi:
         ssl_context = ssl.create_default_context(cafile=certifi.where())
         extra_headers = None
         connection_message = {'locale': self._locale}
-        connect_id = 21
+        connect_id = 27
 
         if self._weblogin:
             # authenticate with cookies, set different connection message and connect ID
@@ -269,7 +269,7 @@ class TradeRepublicApi:
                 'clientId': 'app.traderepublic.com',
                 'clientVersion': '5582',
             }
-            connect_id = 22
+            connect_id = 28
 
         self._ws = await websockets.connect('wss://api.traderepublic.com', ssl=ssl_context, extra_headers=extra_headers)
         await self._ws.send(f'connect {connect_id} {json.dumps(connection_message)}')
@@ -382,7 +382,7 @@ class TradeRepublicApi:
         return asyncio.get_event_loop().run_until_complete(self._receive_one(fut, timeout=timeout))
 
     async def portfolio(self):
-        return await self.subscribe({'type': 'portfolio'})
+        return await self.subscribe({'type': 'compactPortfolio'})
 
     async def watchlist(self):
         return await self.subscribe({'type': 'watchlist'})
@@ -533,6 +533,7 @@ class TradeRepublicApi:
         size,
         limit,
         expiry,
+        sell_fractions,
         expiry_date=None,
         warnings_shown=None,
     ):
@@ -546,6 +547,7 @@ class TradeRepublicApi:
                 'expiry': {'type': expiry},
                 'limit': limit,
                 'mode': 'limit',
+                'sellFractions': sell_fractions,
                 'size': size,
                 'type': order_type,
             },
@@ -593,6 +595,7 @@ class TradeRepublicApi:
         size,
         stop,
         expiry,
+        sell_fractions,
         expiry_date=None,
         warnings_shown=None,
     ):
@@ -605,6 +608,7 @@ class TradeRepublicApi:
                 'exchangeId': exchange,
                 'expiry': {'type': expiry},
                 'mode': 'stopMarket',
+                'sellFractions': sell_fractions,
                 'size': size,
                 'stop': stop,
                 'type': order_type,
