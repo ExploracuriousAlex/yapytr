@@ -353,14 +353,14 @@ class Timeline:
                     if max_age_timestamp == 0 or max_age_timestamp < timestamp:
                         # save all savingsplan documents in a subdirectory
                         if isSavingsPlan:
-                            dl.dl_doc(doc, response['titleText'], response['subtitleText'], subfolder='Sparplan')
+                            dl.to_dl_list(doc, response['titleText'], response['subtitleText'], subfolder='Sparplan')
                         else:
                             # In case of a stock transfer (Wertpapierübertrag) add additional information to the document title
                             if response['titleText'] == 'Wertpapierübertrag':
                                 body = next(item['data']['body'] for item in self.events_with_docs if item['data']['id'] == response['id'])
-                                dl.dl_doc(doc, response['titleText'] + " - " + body, response['subtitleText'])
+                                dl.to_dl_list(doc, response['titleText'] + " - " + body, response['subtitleText'])
                             else:
-                                dl.dl_doc(doc, response['titleText'], response['subtitleText'])
+                                dl.to_dl_list(doc, response['titleText'], response['subtitleText'])
 
         if self.received_detail == self.num_timeline_details:
             self.log.info('Received all details')
@@ -372,5 +372,5 @@ class Timeline:
                 json.dump(self.events_with_docs, f, ensure_ascii=False, indent=2)
 
             export_transactions(dl.output_path / 'other_events.json', dl.output_path / 'account_transactions.csv')
-
+            dl.dl_docs()
             dl.work_responses()

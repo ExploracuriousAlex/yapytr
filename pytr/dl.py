@@ -3,7 +3,7 @@ import re
 from concurrent.futures import as_completed
 from pathlib import Path
 from requests_futures.sessions import FuturesSession
-from requests import session
+from requests.sessions import Session
 
 from pathvalidate import sanitize_filepath
 
@@ -25,7 +25,8 @@ class DL:
         self.filename_fmt = filename_fmt
         self.since_timestamp = since_timestamp
 
-        requests_session = session()
+        requests_session = Session()
+        
         if self.tr._weblogin:
             requests_session.headers = self.tr._default_headers_web
         else:
@@ -36,11 +37,11 @@ class DL:
         self.docs_request = 0
         self.done = 0
         self.filepaths = []
-        self.doc_urls = []
         self.doc_urls_history = []
         self.tl = Timeline(self.tr)
         self.log = get_logger(__name__)
         self.load_history()
+        self.download_list = []
 
     def load_history(self):
         '''
@@ -71,11 +72,12 @@ class DL:
             else:
                 self.log.warning(f"unmatched subscription of type '{subscription['type']}':\n{preview(response)}")
 
-    def dl_doc(self, doc, titleText, subtitleText, subfolder=None):
+    def to_dl_list(self, doc, titleText, subtitleText, subfolder=None):
         '''
-        send asynchronous request, append future with filepath to self.futures
+        Creates the local file destination path based on the document data and saves it in the download list along with the source URL for later download.
         '''
         doc_url = doc['action']['payload']
+        doc_url_base = doc_url.split('?')[0]
 
         date = doc['detail']
         iso_date = '-'.join(date.split('.')[::-1])
@@ -120,40 +122,48 @@ class DL:
         filepath = sanitize_filepath(filepath, '_', 'auto')
         filepath_with_doc_id = sanitize_filepath(filepath_with_doc_id, '_', 'auto')
 
-        if filepath in self.filepaths:
-            self.log.debug(f'File {filepath} already in queue. Append document id {doc_id}...')
-            if filepath_with_doc_id in self.filepaths:
-                self.log.debug(f'File {filepath_with_doc_id} already in queue. Skipping...')
-                return
-            else:
-                filepath = filepath_with_doc_id
+        download_job = {'doc_url': doc_url, 'doc_url_base' : doc_url_base, 'filepath' : filepath, 'filepath_with_doc_id' : filepath_with_doc_id}
         
-        self.filepaths.append(filepath)
+        if doc_url_base in self.doc_urls_history:
+                self.log.debug(f'Source URL {doc_url_base} is already in history. Skipping...')
+                return
+        elif sum(1 for dlj in self.download_list if dlj.get('doc_url_base') == doc_url_base) == 0:
+            self.download_list.append(download_job)
+        else:
+            self.log.debug(f'Source URL {doc_url_base} is already in queue. Skipping...')
+            return
 
-        if filepath.is_file() is False:
-            doc_url_base = doc_url.split('?')[0]
-            if doc_url_base in self.doc_urls:
-                self.log.debug(f'URL {doc_url_base} already in queue. Skipping...')
-                return
-            elif doc_url_base in self.doc_urls_history:
-                self.log.debug(f'URL {doc_url_base} already in history. Skipping...')
-                return
-            else:
-                self.doc_urls.append(doc_url_base)
+    def dl_docs(self):
+        '''
+        Download the documents from the download list.
+        '''
+
+        for dlj in self.download_list:
+
+            doc_url = dlj.get('doc_url')
+            doc_url_base = dlj.get('doc_url_base')
+            filepath = dlj.get('filepath')
+            filepath_with_doc_id = dlj.get('filepath_with_doc_id')
 
             future = self.session.get(doc_url)
-            future.filepath = filepath
+            if sum(1 for entry in self.download_list if entry.get('filepath') == filepath) == 1:
+                future.filepath = filepath
+            else:
+                if sum(1 for entry in self.download_list if entry.get('filepath_with_doc_id') == filepath_with_doc_id) == 1:
+                    future.filepath = filepath_with_doc_id
+                else:
+                    self.log.error(f"Can't do multiple downloads with the same destination {filepath_with_doc_id}.")
+                    continue
+            
             future.doc_url_base = doc_url_base
             self.futures.append(future)
-            self.log.debug(f'Added {filepath} to queue')
-        else:
-            self.log.debug(f'file {filepath} already exists. Skipping...')
+            self.log.debug(f'Added {future.filepath} to download queue')
 
     def work_responses(self):
         '''
         process responses of async requests
         '''
-        if len(self.doc_urls) == 0:
+        if len(self.download_list) == 0:
             self.log.info('Nothing to download')
             exit(0)
 
@@ -174,8 +184,8 @@ class DL:
                     self.done += 1
                     history_file.write(f'{future.doc_url_base}\n')
 
-                    self.log.debug(f'{self.done:>3}/{len(self.doc_urls)} {future.filepath.name}')
+                    self.log.debug(f'{self.done:>3}/{len(self.download_list)} {future.filepath.name}')
 
-                if self.done == len(self.doc_urls):
+                if self.done == len(self.download_list):
                     self.log.info('Done.')
                     exit(0)
