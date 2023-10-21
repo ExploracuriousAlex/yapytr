@@ -27,13 +27,13 @@ def login(phone_no=None, pin=None, web=True):
 
     if phone_no is None and CREDENTIALS_FILE.is_file():
         log.info('Found credentials file')
-        with open(CREDENTIALS_FILE) as f:
+        with open(CREDENTIALS_FILE, encoding="utf-8") as f:
             lines = f.readlines()
         phone_no = lines[0].strip()
         pin = lines[1].strip()
         phone_no_masked = phone_no[:-8] + '********'
         pin_masked = len(pin) * '*'
-        log.info(f'Phone: {phone_no_masked}, PIN: {pin_masked}')
+        log.info('Phone: %s PIN: %s', phone_no_masked, pin_masked)
     else:
         CREDENTIALS_FILE.parent.mkdir(parents=True, exist_ok=True)
         if phone_no is None:
@@ -50,10 +50,10 @@ def login(phone_no=None, pin=None, web=True):
         print('Save credentials? Type "y" to save credentials:')
         save = input()
         if save == 'y':
-            with open(CREDENTIALS_FILE, 'w') as f:
+            with open(CREDENTIALS_FILE, mode='w', encoding="utf-8") as f:
                 f.writelines([phone_no + '\n', pin + '\n'])
 
-            log.info(f'Saved credentials in {CREDENTIALS_FILE}')
+            log.info('Saved credentials in %s', CREDENTIALS_FILE)
 
         else:
             save_cookies = False

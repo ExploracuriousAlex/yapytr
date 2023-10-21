@@ -50,11 +50,11 @@ class DL:
         if self.history_file.exists():
             with self.history_file.open() as f:
                 self.doc_urls_history = f.read().splitlines()
-            self.log.info(f'Found {len(self.doc_urls_history)} lines in history file')
+            self.log.info("Found %s lines in history file", len(self.doc_urls_history))
         else:
             self.history_file.parent.mkdir(exist_ok=True, parents=True)
             self.history_file.touch()
-            self.log.info('Created history file')
+            self.log.info("Created history file")
 
     async def dl_loop(self):
         await self.tl.get_next_timeline(max_age_timestamp=self.since_timestamp)
@@ -70,7 +70,11 @@ class DL:
             elif subscription['type'] == 'timelineDetail':
                 await self.tl.timelineDetail(response, self, max_age_timestamp=self.since_timestamp)
             else:
-                self.log.warning(f"unmatched subscription of type '{subscription['type']}':\n{preview(response)}")
+                self.log.warning(
+                    "unmatched subscription of type '%s':\n%s",
+                    subscription["type"],
+                    preview(response),
+                )
 
     def to_dl_list(self, doc, titleText, subtitleText, subfolder=None):
         '''
@@ -125,12 +129,23 @@ class DL:
         download_job = {'doc_url': doc_url, 'doc_url_base' : doc_url_base, 'filepath' : filepath, 'filepath_with_doc_id' : filepath_with_doc_id}
         
         if doc_url_base in self.doc_urls_history:
-                self.log.debug(f'Source URL {doc_url_base} is already in history. Skipping...')
-                return
-        elif sum(1 for dlj in self.download_list if dlj.get('doc_url_base') == doc_url_base) == 0:
+            self.log.debug(
+                "Source URL %s is already in history. Skipping...", doc_url_base
+            )
+            return
+        elif (
+            sum(
+                1
+                for dlj in self.download_list
+                if dlj.get("doc_url_base") == doc_url_base
+            )
+            == 0
+        ):
             self.download_list.append(download_job)
         else:
-            self.log.debug(f'Source URL {doc_url_base} is already in queue. Skipping...')
+            self.log.debug(
+                "Source URL %s is already in queue. Skipping...", doc_url_base
+            )
             return
 
     def dl_docs(self):
@@ -152,12 +167,15 @@ class DL:
                 if sum(1 for entry in self.download_list if entry.get('filepath_with_doc_id') == filepath_with_doc_id) == 1:
                     future.filepath = filepath_with_doc_id
                 else:
-                    self.log.error(f"Can't do multiple downloads with the same destination {filepath_with_doc_id}.")
+                    self.log.error(
+                        "Can't do multiple downloads with the same destination %s.",
+                        filepath_with_doc_id,
+                    )
                     continue
             
             future.doc_url_base = doc_url_base
             self.futures.append(future)
-            self.log.debug(f'Added {future.filepath} to download queue')
+            self.log.debug("Added %s to download queue", future.filepath)
 
     def work_responses(self):
         '''
@@ -171,7 +189,7 @@ class DL:
             self.log.info('Waiting for downloads to complete..')
             for future in as_completed(self.futures):
                 if future.filepath.is_file() is True:
-                    self.log.debug(f'file {future.filepath} was already downloaded.')
+                    self.log.debug("file %s was already downloaded.", future.filepath)
 
                 try:
                     r = future.result()
