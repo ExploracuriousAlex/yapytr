@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import logging
+import sys
 
 from pytr.main import main
 
@@ -8,9 +9,9 @@ if __name__ == '__main__':
         main()
     except KeyboardInterrupt:
         log = logging.getLogger(__name__)
-        log.info('Exiting...')
-        exit()
+        log.warning('Interrupt from keyboard (CTRL + C).')
+        sys.exit()
     except Exception as e:
         log = logging.getLogger(__name__)
-        log.fatal(e)
+        log.critical('The program is terminated due to an unhandled exception.')
         raise
