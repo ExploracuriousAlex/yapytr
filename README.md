@@ -1,6 +1,11 @@
-# pytr: Use TradeRepublic in terminal
+# pytr: use Trade Republic via the console
 
-This is a library for the private API of the Trade Republic online brokerage. I am not affiliated with Trade Republic Bank GmbH.
+This program provides an alternative access to Trade Republich via the console.
+
+Neither is it endorsed by Trade Republic nor am I in any relationship with Trade Republic (Trade Republic Bank GmbH).
+
+Use at your own risk!
+
 
 ## Installation
 
@@ -9,7 +14,7 @@ Install with `pip install pytr`
 Or you can clone the repo like so:
 
 ```sh
-git clone https://github.com/marzzzello/pytr.git
+git clone https://github.com/ExploracuriousAlex/pytr.git
 cd pytr
 pip install .
 ```
@@ -54,15 +59,7 @@ Options:
 
 ## Authentication
 
-There are two authentication methods:
-
-- Web login (default)
-- App login
-
-Web login is the newer method that uses the same login method as [app.traderepublic.com](https://app.traderepublic.com/), meaning you receive a token in the TradeRepublic app or via SMS.
-
-App login is the older method that uses the same login method as the TradeRepublic app.
-First you need to perform a device reset - a private key will be generated that pins your "device". The private key is saved to your keyfile. This procedure will log you out from your mobile device.
+Pytr uses the same login method as [app.traderepublic.com](https://app.traderepublic.com/), meaning you receive a token in the TradeRepublic app or via SMS.
 
 ```sh
 $ pytr login
