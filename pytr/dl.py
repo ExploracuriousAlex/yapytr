@@ -78,7 +78,7 @@ class DL:
                     response, max_age_timestamp=self.since_timestamp
                 )
             elif subscription["type"] == "timelineDetail":
-                await self.tl.timelineDetail(
+                await self.tl.timeline_detail(
                     response, self, max_age_timestamp=self.since_timestamp
                 )
             else:
@@ -88,9 +88,10 @@ class DL:
                     preview(response),
                 )
 
-    def to_dl_list(self, doc, titleText, subtitleText, subfolder=None):
+    def to_dl_list(self, doc, title_text, subtitle_text, subfolder=None):
         """
-        Creates the local file destination path based on the document data and saves it in the download list along with the source URL for later download.
+        Creates the local file destination path based on the document data
+        and saves it in the download list along with the source URL for later download.
         """
         doc_url = doc["action"]["payload"]
         doc_url_base = doc_url.split("?")[0]
@@ -100,7 +101,7 @@ class DL:
         doc_id = doc["id"]
 
         # extract time from subtitleText
-        time = re.findall("um (\\d+:\\d+) Uhr", subtitleText)
+        time = re.findall("um (\\d+:\\d+) Uhr", subtitle_text)
         if time == []:
             time = ""
         else:
@@ -111,7 +112,8 @@ class DL:
         else:
             directory = self.output_path
 
-        # If doc_type is something like 'Kosteninformation 2', then strip the 2 and save it in doc_type_num
+        # If doc_type is something like 'Kosteninformation 2',
+        # then strip the 2 and save it in doc_type_num
         doc_type = doc["title"].rsplit(" ")
         if doc_type[-1].isnumeric() is True:
             doc_type_num = f" {doc_type.pop()}"
@@ -119,14 +121,14 @@ class DL:
             doc_type_num = ""
 
         doc_type = " ".join(doc_type)
-        titleText = titleText.replace("\n", "").replace("/", "-")
-        subtitleText = subtitleText.replace("\n", "").replace("/", "-")
+        title_text = title_text.replace("\n", "").replace("/", "-")
+        subtitle_text = subtitle_text.replace("\n", "").replace("/", "-")
 
         filename = self.filename_fmt.format(
             iso_date=iso_date,
             time=time,
-            title=titleText,
-            subtitle=subtitleText,
+            title=title_text,
+            subtitle=subtitle_text,
             doc_num=doc_type_num,
             id=doc_id,
         )
@@ -240,7 +242,10 @@ class DL:
                     history_file.write(f"{future.doc_url_base}\n")
 
                     self.log.debug(
-                        f"{self.done:>3}/{len(self.download_list)} {future.filepath.name}"
+                        "%3s/%s %s",
+                        self.done,
+                        len(self.download_list),
+                        future.filepath.name,
                     )
 
                 if self.done == len(self.download_list):

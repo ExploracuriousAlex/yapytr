@@ -1,14 +1,11 @@
 #!/usr/bin/env python3
-
-import coloredlogs
 import json
 import logging
-import requests
 from datetime import datetime
-from locale import getdefaultlocale
+from locale import getlocale
+import requests
+import coloredlogs
 from packaging import version
-
-log_level = None
 
 
 def get_logger(name=__name__, verbosity=None):
@@ -19,7 +16,7 @@ def get_logger(name=__name__, verbosity=None):
     :param verbosity:
     :return: Logger
     """
-    global log_level
+
     if verbosity is not None:
         if log_level is None:
             log_level = verbosity
@@ -97,7 +94,9 @@ def check_version(installed_version):
 
     if version.parse(installed_version) < version.parse(latest_version):
         log.warning(
-            f"Installed pytr version ({installed_version}) is outdated. Latest version is {latest_version}"
+            "Installed pytr version %s is outdated. Latest version is %s",
+            installed_version,
+            latest_version,
         )
     else:
         log.info("pytr is up to date")
@@ -115,7 +114,7 @@ def export_transactions(input_path, output_path, lang="auto"):
     """
     log = get_logger(__name__)
     if lang == "auto":
-        locale = getdefaultlocale()[0]
+        locale = getlocale()[0]
         if locale is None:
             lang = "en"
         else:
@@ -198,8 +197,8 @@ def export_transactions(input_path, output_path, lang="auto"):
 
         for event in timeline:
             event = event["data"]
-            dateTime = datetime.fromtimestamp(int(event["timestamp"] / 1000))
-            date = dateTime.strftime("%Y-%m-%d")
+            date_time = datetime.fromtimestamp(int(event["timestamp"] / 1000))
+            date = date_time.strftime("%Y-%m-%d")
 
             title = event["title"]
             try:
@@ -230,7 +229,7 @@ def export_transactions(input_path, output_path, lang="auto"):
             # Dividend - Shares
             elif title == "Reinvestierung":
                 # TODO: Implement reinvestment
-                log.warning("Detected reivestment, skipping... (not implemented yet)")
+                log.warning("Detected reinvestment, skipping... (not implemented yet)")
 
     log.info("Deposit creation finished!")
 
@@ -244,6 +243,8 @@ class Timeline:
         self.num_timeline_details = 0
         self.events_without_docs = []
         self.events_with_docs = []
+        self.num_timelines = 0
+        self.timeline_events = []
 
     async def get_next_timeline(self, response=None, max_age_timestamp=0):
         """
@@ -256,8 +257,6 @@ class Timeline:
             # empty response / first timeline
             self.log.info("Awaiting #1  timeline")
             # self.timelines = []
-            self.num_timelines = 0
-            self.timeline_events = []
             await self.tr.timeline()
         else:
             timestamp = response["data"][-1]["data"]["timestamp"]
@@ -270,15 +269,17 @@ class Timeline:
             after = response["cursors"].get("after")
             if after is None:
                 # last timeline is reached
-                self.log.info(f"Received #{self.num_timelines:<2} (last) timeline")
+                self.log.info("Received #%-2s (last) timeline", self.num_timelines)
                 await self._get_timeline_details(5)
             elif max_age_timestamp != 0 and timestamp < max_age_timestamp:
-                self.log.info(f"Received #{self.num_timelines+1:<2} timeline")
+                self.log.info("Received #%-2s timeline", self.num_timelines + 1)
                 self.log.info("Reached last relevant timeline")
                 await self._get_timeline_details(5, max_age_timestamp=max_age_timestamp)
             else:
                 self.log.info(
-                    f"Received #{self.num_timelines:<2} timeline, awaiting #{self.num_timelines+1:<2} timeline"
+                    "Received #%-2s timeline, awaiting #%-2s timeline",
+                    self.num_timelines,
+                    self.num_timelines + 1,
                 )
                 await self.tr.timeline(after)
 
@@ -324,7 +325,11 @@ class Timeline:
             else:
                 self.events_without_docs.append(event)
                 self.log.debug(
-                    f"{msg} {event['data']['title']}: {event['data'].get('body')} {json.dumps(event)}"
+                    "%s %s: %s %s",
+                    msg,
+                    event["data"]["title"],
+                    event["data"].get("body"),
+                    json.dumps(event),
                 )
                 self.num_timeline_details -= 1
                 continue
@@ -333,7 +338,7 @@ class Timeline:
             self.requested_detail += 1
             await self.tr.timeline_detail(event["data"]["id"])
 
-    async def timelineDetail(self, response, dl, max_age_timestamp=0):
+    async def timeline_detail(self, response, dl, max_age_timestamp=0):
         """
         process timeline response and request timelines
         """
@@ -349,9 +354,9 @@ class Timeline:
                 await self._get_timeline_details(5)
 
         # print(f'len timeline_events: {len(self.timeline_events)}')
-        isSavingsPlan = False
+        is_savings_plan = False
         if response["subtitleText"] == "Sparplan":
-            isSavingsPlan = True
+            is_savings_plan = True
         else:
             # some savingsPlan don't have the subtitleText == 'Sparplan' but there are actions just for savingsPans
             # but maybe these are unneeded duplicates
@@ -362,18 +367,18 @@ class Timeline:
                             "editSavingsPlan",
                             "deleteSavingsPlan",
                         ]:
-                            isSavingsPlan = True
+                            is_savings_plan = True
                             break
 
-        if response["subtitleText"] != "Sparplan" and isSavingsPlan is True:
-            isSavingsPlan_fmt = " -- SPARPLAN"
+        if response["subtitleText"] != "Sparplan" and is_savings_plan is True:
+            savings_plan_fmt = " -- SPARPLAN"
         else:
-            isSavingsPlan_fmt = ""
+            savings_plan_fmt = ""
 
         max_details_digits = len(str(self.num_timeline_details))
         self.log.info(
             f"{self.received_detail:>{max_details_digits}}/{self.num_timeline_details}: "
-            + f"{response['titleText']} -- {response['subtitleText']}{isSavingsPlan_fmt}"
+            + f"{response['titleText']} -- {response['subtitleText']}{savings_plan_fmt}"
         )
 
         for section in response["sections"]:
@@ -388,7 +393,7 @@ class Timeline:
                         timestamp = datetime.now().timestamp() * 1000
                     if max_age_timestamp == 0 or max_age_timestamp < timestamp:
                         # save all savingsplan documents in a subdirectory
-                        if isSavingsPlan:
+                        if is_savings_plan:
                             dl.to_dl_list(
                                 doc,
                                 response["titleText"],

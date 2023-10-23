@@ -1,8 +1,9 @@
 import json
 import sys
-from pygments import highlight, lexers, formatters
 import time
-
+from pygments import highlight
+from pygments.lexers.data import JsonLexer
+from pygments.formatters.terminal import TerminalFormatter
 from pytr.api import TradeRepublicApi, CREDENTIALS_FILE
 from pytr.utils import get_logger
 
@@ -10,9 +11,7 @@ from pytr.utils import get_logger
 def get_settings(tr):
     formatted_json = json.dumps(tr.settings(), indent=2)
     if sys.stdout.isatty():
-        colorful_json = highlight(
-            formatted_json, lexers.JsonLexer(), formatters.TerminalFormatter()
-        )
+        colorful_json = highlight(formatted_json, JsonLexer(), TerminalFormatter())
         return colorful_json
     else:
         return formatted_json
