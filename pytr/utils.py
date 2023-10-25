@@ -17,6 +17,8 @@ def get_logger(name=__name__, verbosity=None):
     :return: Logger
     """
 
+    log_level = None
+
     if verbosity is not None:
         if log_level is None:
             log_level = verbosity
@@ -92,14 +94,12 @@ def check_version(installed_version):
         return
     latest_version = r.json()[0]["name"]
 
+    log.info("The latest pytr version on the server is %s", latest_version)
+
     if version.parse(installed_version) < version.parse(latest_version):
-        log.warning(
-            "Installed pytr version %s is outdated. Latest version is %s",
-            installed_version,
-            latest_version,
-        )
+        log.warning("Your pytr version is outdated.")
     else:
-        log.info("pytr is up to date")
+        log.info("Your pytr version is up to date. ")
 
 
 def export_transactions(input_path, output_path, lang="auto"):

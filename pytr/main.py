@@ -262,7 +262,7 @@ def main():
         export_transactions(args.input, args.output, args.lang)
     elif args.version:
         installed_version = version("pytr")
-        print(installed_version)
+        log.info("You have installed pytr %s", installed_version)
         check_version(installed_version)
     else:
         parser.print_help()
