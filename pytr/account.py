@@ -1,11 +1,13 @@
 import json
 import sys
 import time
+
 from pygments import highlight
-from pygments.lexers.data import JsonLexer
 from pygments.formatters.terminal import TerminalFormatter
-from pytr.api import TradeRepublicApi, CREDENTIALS_FILE
-from pytr.utils import get_logger
+from pygments.lexers.data import JsonLexer
+
+from .tr_api import CREDENTIALS_FILE, COOKIES_FILE, BASE_DIR, TradeRepublicApi
+from .utils import get_colored_logger, enhanced_input
 
 
 def get_settings(tr):
@@ -17,13 +19,23 @@ def get_settings(tr):
         return formatted_json
 
 
-def login(phone_no=None, pin=None, web=True):
+def login(phone_no=None, pin=None):
     """
-    If web is true, use web login method as else simulate app login.
+    Login to Trade Republic.
+
     Check if credentials file exists else create it.
-    If no parameters are set but are needed then ask for input
+    If no parameters are set but are needed then ask for input.
+
+    Args:
+        phone_no: _description_. Defaults to None.
+        pin: _description_. Defaults to None.
+
+    Returns:
+        TradeRepublicApi object.
     """
-    log = get_logger(__name__)
+
+    log = get_colored_logger(__name__)
+
     save_cookies = True
 
     if phone_no is None and CREDENTIALS_FILE.is_file():
@@ -39,20 +51,26 @@ def login(phone_no=None, pin=None, web=True):
         CREDENTIALS_FILE.parent.mkdir(parents=True, exist_ok=True)
         if phone_no is None:
             log.info("Credentials file not found")
-            print(
-                "Please enter your TradeRepbulic phone number in the format +4912345678:"
+
+            phone_no = enhanced_input(
+                "Please enter your Trade Repbulic phone number in the format +4912345678: ",
+                "\+[0-9]{10,15}",  # pylint: disable=anomalous-backslash-in-string
+                "Invalid phone number format!",
             )
-            phone_no = input()
+
         else:
             log.info("Phone number provided as argument")
 
         if pin is None:
-            print("Please enter your TradeRepbulic pin:")
-            pin = input()
+            pin = enhanced_input(
+                "Please enter your Trade Repbulic pin: ",
+                "[0-9]{4}",
+                "Invalid pin format!",
+            )
 
-        print('Save credentials? Type "y" to save credentials:')
-        save = input()
-        if save == "y":
+        save = input('Save credentials? Type "y" to save credentials: ')
+
+        if save.lower() == "y":
             with open(CREDENTIALS_FILE, mode="w", encoding="utf-8") as f:
                 f.writelines([phone_no + "\n", pin + "\n"])
 
@@ -64,52 +82,65 @@ def login(phone_no=None, pin=None, web=True):
 
     tr = TradeRepublicApi(phone_no=phone_no, pin=pin, save_cookies=save_cookies)
 
-    if web:
-        # Use same login as app.traderepublic.com
-        if tr.resume_websession():
-            log.info("Web session resumed")
-        else:
-            try:
-                countdown = tr.inititate_weblogin()
-            except ValueError as e:
-                log.fatal(str(e))
-                exit(1)
-            request_time = time.time()
-            print("Enter the code you received to your mobile app as a notification.")
-            print(
-                f"Enter nothing if you want to receive the (same) code as SMS. (Countdown: {countdown})"
-            )
-            code = input("Code: ")
-            if code == "":
-                countdown = countdown - (time.time() - request_time)
-                for remaining in range(int(countdown)):
-                    print(
-                        f"Need to wait {int(countdown-remaining)} seconds before requesting SMS...",
-                        end="\r",
-                    )
-                    time.sleep(1)
-                print()
-                tr.resend_weblogin()
-                code = input("SMS requested. Enter the confirmation code:")
-            tr.complete_weblogin(code)
+    # Use same login as app.traderepublic.com
+    if tr.resume_websession():
+        log.info("Web session resumed")
     else:
-        # Try to login. Ask for device reset if needed
         try:
-            tr.login()
-        except (KeyError, AttributeError):
-            # old keyfile or no keyfile
-            print("Error logging in. Reset device? (y)")
-            confirmation = input()
-            if confirmation == "y":
-                tr.initiate_device_reset()
-                print("You should have received a SMS with a token. Please type it in:")
-                token = input()
-                tr.complete_device_reset(token)
-                print("Reset done")
-            else:
-                print("Cancelling reset")
-                exit(1)
+            countdown = tr.inititate_weblogin()
+        except ValueError as e:
+            log.fatal(str(e))
+            exit(1)
+        request_time = time.time()
+        print("Enter the code you received to your mobile app as a notification.")
+        print(
+            f"Enter nothing if you want to receive the (same) code as SMS. (Countdown: {countdown})"
+        )
+        code = input("Code: ")
+        if code == "":
+            countdown = countdown - (time.time() - request_time)
+            for remaining in range(int(countdown)):
+                print(
+                    f"Need to wait {int(countdown-remaining)} seconds before requesting SMS...",
+                    end="\r",
+                )
+                time.sleep(1)
+            print()
+            tr.resend_weblogin()
+            code = input("SMS requested. Enter the confirmation code:")
+        tr.complete_weblogin(code)
 
     log.info("Logged in")
     # log.debug(get_settings(tr))
     return tr
+
+
+def clean():
+    """
+    Delete the pytr settings.
+
+    Check whether a credential file and/or cookie file exists and if so, delete it.
+    Also delete the pytr settings folder if there is one.
+    """
+    log = get_colored_logger(__name__)
+
+    if CREDENTIALS_FILE.is_file():
+        log.debug("Found credentials file '%s'.", CREDENTIALS_FILE)
+        CREDENTIALS_FILE.unlink(missing_ok=True)
+        log.info("Deleted credentials file.")
+    else:
+        log.info("No credentials file found. Nothing to do.")
+
+    if COOKIES_FILE.is_file():
+        log.debug("Found cookies file '%s'.", COOKIES_FILE)
+        COOKIES_FILE.unlink(missing_ok=True)
+        log.info("Deleted cookies file.")
+    else:
+        log.info("No cookies file found. Nothing to do.")
+
+    if BASE_DIR.is_dir():
+        log.debug("Found pytr folder '%s'.", BASE_DIR)
+        BASE_DIR.rmdir()
+        log.info("Deleted pytr settings folder.")
+    else:
+        log.info("No settings folder found. Nothing to do.")

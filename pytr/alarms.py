@@ -1,5 +1,6 @@
 import asyncio
-from pytr.utils import preview
+
+from pytr.utils import json_preview
 from datetime import datetime
 
 
@@ -9,7 +10,9 @@ class Alarms:
 
     async def alarms_loop(self):
         recv = 0
+
         await self.tr.price_alarm_overview()
+
         while True:
             _subscription_id, subscription, response = await self.tr.recv()
 
@@ -18,7 +21,7 @@ class Alarms:
                 self.alarms = response
             else:
                 print(
-                    f"unmatched subscription of type '{subscription['type']}':\n{preview(response)}"
+                    f"unmatched subscription of type '{subscription['type']}':\n{json_preview(response)}"
                 )
 
             if recv == 1:
@@ -26,7 +29,9 @@ class Alarms:
 
     async def ticker_loop(self):
         recv = 0
+
         await self.tr.price_alarm_overview()
+
         while True:
             _subscription_id, subscription, response = await self.tr.recv()
 
@@ -35,7 +40,7 @@ class Alarms:
                 self.alarms = response
             else:
                 print(
-                    f"unmatched subscription of type '{subscription['type']}':\n{preview(response)}"
+                    f"unmatched subscription of type '{subscription['type']}':\n{json_preview(response)}"
                 )
 
             if recv == 1:
@@ -49,11 +54,14 @@ class Alarms:
             self.alarms
         ):  # sorted(positions, key=lambda x: x['netValue'], reverse=True):
             ts = int(a["createdAt"]) / 1000.0
+
             created = datetime.fromtimestamp(ts).isoformat(sep=" ", timespec="minutes")
+
             if a["triggeredAt"] is None:
                 triggered = "-"
             else:
                 ts = int(a["triggeredAt"]) / 1000.0
+
                 triggered = datetime.fromtimestamp(ts).isoformat(
                     sep=" ", timespec="minutes"
                 )

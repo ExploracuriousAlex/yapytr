@@ -2,67 +2,187 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "details",
+      "name": "clear: pytr clear",
       "type": "python",
       "request": "launch",
       "module": "pytr",
-      "args": ["-v", "debug", "details", "DE0006231004"]
+      "args": [
+        "clear"
+      ]
     },
     {
-      "name": "portfolio",
+      "name": "clear: -v debug pytr clear",
       "type": "python",
       "request": "launch",
       "module": "pytr",
-      "args": ["-v", "debug", "portfolio"]
+      "args": [
+        "-v",
+        "debug",
+        "clear"
+      ]
     },
     {
-      "name": "get_price_alarms",
+      "name": "clear: pytr clear -h",
       "type": "python",
       "request": "launch",
       "module": "pytr",
-      "args": ["-v", "debug", "get_price_alarms"]
+      "args": [
+        "clear",
+        "-h"
+      ]
     },
     {
-      "name": "set_price_alarms",
+      "name": "completion: pytr completion",
       "type": "python",
       "request": "launch",
       "module": "pytr",
-      "args": ["-v", "debug", "set_price_alarms"]
+      "args": [
+        "completion"
+      ]
     },
     {
-      "name": "login",
+      "name": "completion: pytr completion -h",
       "type": "python",
       "request": "launch",
       "module": "pytr",
-      "args": ["-v", "debug", "login"]
+      "args": [
+        "completion",
+        "-h"
+      ]
     },
     {
-      "name": "dl_docs debug",
+      "name": "details: pytr -v debug details DE0007236101",
       "type": "python",
       "request": "launch",
       "module": "pytr",
-      "args": ["-v", "debug", "dl_docs", "dldocs_debug"]
+      "args": [
+        "-v",
+        "debug",
+        "details",
+        "DE0007236101"
+      ]
     },
     {
-      "name": "dl_docs",
+      "name": "dl_docs: pytr -v debug dl_docs doc_folder_debug",
       "type": "python",
       "request": "launch",
       "module": "pytr",
-      "args": ["dl_docs", "dldocs"]
+      "args": [
+        "-v",
+        "debug",
+        "dl_docs",
+        "doc_folder_debug"
+      ]
     },
     {
-      "name": "dl_docs 20 days",
+      "name": "dl_docs: pytr -v debug dl_docs doc_folder_debug --last_days 2",
       "type": "python",
       "request": "launch",
       "module": "pytr",
-      "args": ["dl_docs", "dldocs", "--last_days", "20"]
+      "args": [
+        "-v",
+        "debug",
+        "dl_docs",
+        "doc_folder_debug",
+        "--last_days",
+        "2"
+      ]
     },
     {
-      "name": "dl_docs 2 days debug",
+      "name": "dl_docs: pytr dl_docs doc_folder",
       "type": "python",
       "request": "launch",
       "module": "pytr",
-      "args": ["-v", "debug", "dl_docs", "dldocs_debug", "--last_days", "2"]
+      "args": [
+        "dl_docs",
+        "doc_folder"
+      ]
+    },
+    {
+      "name": "dl_docs: pytr dl_docs doc_folder --last_days 20",
+      "type": "python",
+      "request": "launch",
+      "module": "pytr",
+      "args": [
+        "dl_docs",
+        "doc_folder",
+        "--last_days",
+        "20"
+      ]
+    },
+    {
+      "name": "get_price_alarms: pytr -v debug get_price_alarms",
+      "type": "python",
+      "request": "launch",
+      "module": "pytr",
+      "args": [
+        "-v",
+        "debug",
+        "get_price_alarms"
+      ]
+    },
+    {
+      "name": "login: pytr -v debug login",
+      "type": "python",
+      "request": "launch",
+      "module": "pytr",
+      "args": [
+        "-v",
+        "debug",
+        "login"
+      ]
+    },
+    {
+      "name": "login: pytr -v debug login -h",
+      "type": "python",
+      "request": "launch",
+      "module": "pytr",
+      "args": [
+        "-v",
+        "debug",
+        "login",
+        "-h"
+      ]
+    },
+    {
+      "name": "portfolio: pytr -v debug portfolio",
+      "type": "python",
+      "request": "launch",
+      "module": "pytr",
+      "args": [
+        "-v",
+        "debug",
+        "portfolio"
+      ]
+    },
+    {
+      "name": "pytr (without arguments)",
+      "type": "python",
+      "request": "launch",
+      "module": "pytr",
+      "args": []
+    },
+    {
+      "name": "set_price_alarms: pytr -v debug set_price_alarms",
+      "type": "python",
+      "request": "launch",
+      "module": "pytr",
+      "args": [
+        "-v",
+        "debug",
+        "set_price_alarms"
+      ]
+    },
+    {
+      "name": "version: pytr -v debug version",
+      "type": "python",
+      "request": "launch",
+      "module": "pytr",
+      "args": [
+        "-v",
+        "debug",
+        "version"
+      ]
     }
   ]
 }
