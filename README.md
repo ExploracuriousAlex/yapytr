@@ -1,6 +1,6 @@
 # pytr: use Trade Republic via the console
 
-This program provides an alternative access to Trade Republich via the console.
+This program provides an alternative access to Trade Republic via the console.
 
 Neither is it endorsed by Trade Republic nor am I in any relationship with Trade Republic (Trade Republic Bank GmbH).
 
@@ -9,9 +9,7 @@ Use at your own risk!
 
 ## Installation
 
-Install with `pip install pytr`
-
-Or you can clone the repo like so:
+Clone the repo and install with e.g. pip:
 
 ```sh
 git clone https://github.com/ExploracuriousAlex/pytr.git
