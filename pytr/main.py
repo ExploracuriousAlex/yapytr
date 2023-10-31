@@ -13,7 +13,7 @@ import shtab
 from .account import clean, login, print_information
 from .alarms import Alarms
 from .details import Details
-from .dl import DL
+from .doc_download import DocDownload
 from .portfolio import Portfolio
 from .timeline import export_transactions
 from .utils import check_for_update, get_colored_logger
@@ -28,7 +28,8 @@ def create_arguments_parser():
     """
 
     main_parser = argparse.ArgumentParser(
-        description="This program provides an alternative access to Trade Republic via the console.",
+        description="This program provides an alternative "
+        + "access to Trade Republic via the console.",
         formatter_class=lambda prog: argparse.HelpFormatter(prog, max_help_position=30),
     )
 
@@ -65,7 +66,8 @@ def create_arguments_parser():
     sub_parsers.add_parser(
         "clean",
         help="clean pytr settings",
-        description="Delete the credentials file and cookie file as well as the pytr settings folder.",
+        description="Delete the credentials file "
+        + "and cookie file as well as the pytr settings folder.",
     )
 
     parser_completion = sub_parsers.add_parser(
@@ -100,7 +102,8 @@ def create_arguments_parser():
     parser_dl_docs.add_argument(
         "-f",
         "--format",
-        help="define file name format, available variables:\tiso_date, time, title, doc_num, subtitle, id",
+        help="define file name format, available variables:"
+        + "\tiso_date, time, title, doc_num, subtitle, id",
         metavar="FORMAT_STRING",
         default="{iso_date}{time} {title}{doc_num}",
     )
@@ -125,7 +128,8 @@ def create_arguments_parser():
         "export_transactions",
         formatter_class=lambda prog: argparse.HelpFormatter(prog, max_help_position=30),
         help="export transactions for Portfolio Performance",
-        description="Create a CSV with the deposits and removals ready for importing into Portfolio Performance.",
+        description="Create a CSV with the deposits and removals ready for importing "
+        + "into Portfolio Performance.",
     )
     parser_export_transactions.add_argument(
         "input",
@@ -148,7 +152,8 @@ def create_arguments_parser():
         formatter_class=lambda prog: argparse.HelpFormatter(prog, max_help_position=30),
         parents=[sub_parser_common_login_args],
         help="login to Trade Republic",
-        description="Login to Trade Republic. Check if credentials file exists else create it. If no parameters are set but are needed then ask for input.",
+        description="Login to Trade Republic. Check if credentials file exists "
+        + "else create it. If no parameters are set but are needed then ask for input.",
     )
 
     sub_parsers.add_parser(
@@ -208,7 +213,7 @@ def main():
             since_timestamp = 0
         else:
             since_timestamp = (time.time() - (24 * 3600 * args.last_days)) * 1000
-        dl = DL(
+        dl = DocDownload(
             login(phone_no=args.phone_no, pin=args.pin),
             args.output,
             args.format,

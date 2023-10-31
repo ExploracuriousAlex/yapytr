@@ -17,11 +17,8 @@ from .utils import get_colored_logger
 
 class Timeline:
     """
-
-
-    Class containing functions to retrieve timeline and timeline detail information from Trade Republic.
-
-
+    Class containing functions to retrieve timeline and
+    timeline detail information from Trade Republic.
 
     Stores timeline events for further processing.
     """
@@ -88,7 +85,8 @@ class Timeline:
                 self.log.info("Received timeline part %s.", self.num_timelines + 1)
 
                 self.log.info(
-                    "Reached last relevant timeline part according to your --last_days configuration."
+                    "Reached last relevant timeline part "
+                    + "according to your --last_days configuration."
                 )
 
                 await self._get_timeline_details(5, max_age_timestamp=max_age_timestamp)
@@ -213,7 +211,8 @@ class Timeline:
             is_savings_plan = True
 
         else:
-            # some savingsPlan don't have the subtitleText == 'Sparplan' but there are actions just for savingsPans
+            # some savingsPlan don't have the subtitleText == 'Sparplan'
+            # but there are actions just for savingsPans
 
             # but maybe these are unneeded duplicates
 
@@ -273,7 +272,8 @@ class Timeline:
                             )
 
                         else:
-                            # In case of a stock transfer (Wertpapierübertrag) add additional information to the document title
+                            # In case of a stock transfer (Wertpapierübertrag) add
+                            # additional information to the document title
 
                             if response["titleText"] == "Wertpapierübertrag":
                                 body = next(

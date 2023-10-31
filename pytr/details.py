@@ -8,6 +8,12 @@ class Details:
     def __init__(self, tr_api, isin):
         self.tr_api = tr_api
         self.isin = isin
+        self.stockDetails = None
+        self.neonNews = None
+        self.ticker = None
+        self.performance = None
+        self.instrument = None
+        self.instrumentSuitability = None
 
     async def details_loop(self):
         recv = 0

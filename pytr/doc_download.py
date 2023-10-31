@@ -1,3 +1,6 @@
+"""
+Module providing the DocDownload class for Trade Republic document download handling.
+"""
 import re
 from concurrent.futures import as_completed
 from pathlib import Path
@@ -11,7 +14,11 @@ from .tr_api import TradeRepublicError
 from .utils import get_colored_logger, json_preview
 
 
-class DL:
+class DocDownload:
+    """
+    Class for handling document downloads from Trade Republic.
+    """
+
     def __init__(
         self,
         tr_api,
@@ -112,6 +119,14 @@ class DL:
             self.log.info("Successfully generated the document download history file.")
 
     async def dl_loop(self):
+        """
+        Requests timelines and timeline details from Trade Republic websocket
+        and processes them upon receipt.
+
+        When a timeline packet is received, a check is made to see
+        if there is another part and if so, it is requested.
+        When a timeline detail is received, processing is triggered.
+        """
         await self.tl.get_timeline(max_age_timestamp=self.since_timestamp)
 
         while True:
