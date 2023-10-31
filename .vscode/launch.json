@@ -2,14 +2,14 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "_pytr: yapytr",
+      "name": "_yapytr: yapytr",
       "type": "python",
       "request": "launch",
       "module": "yapytr",
       "args": []
     },
     {
-      "name": "_pytr: yapytr -h",
+      "name": "_yapytr: yapytr -h",
       "type": "python",
       "request": "launch",
       "module": "yapytr",
