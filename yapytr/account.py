@@ -129,10 +129,10 @@ def login(phone_no=None, pin=None):
 
 def clean():
     """
-    Delete the pytr settings.
+    Delete the yapytr settings.
 
     Check whether a credential file and/or cookie file exists and if so, delete it.
-    Also delete the pytr settings folder if there is one.
+    Also delete the yapytr settings folder if there is one.
     """
     log = get_colored_logger(__name__)
 
@@ -151,8 +151,8 @@ def clean():
         log.info("No cookies file found. Nothing to do.")
 
     if BASE_DIR.is_dir():
-        log.debug("Found pytr folder '%s'.", BASE_DIR)
+        log.debug("Found yapytr folder '%s'.", BASE_DIR)
         BASE_DIR.rmdir()
-        log.info("Deleted pytr settings folder.")
+        log.info("Deleted yapytr settings folder.")
     else:
         log.info("No settings folder found. Nothing to do.")

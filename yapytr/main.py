@@ -1,5 +1,5 @@
 """
-Pytr main module. Takes care of user interaction and flow control of the program.
+Yapytr main module. Takes care of user interaction and flow control of the program.
 """
 
 #!/usr/bin/env python
@@ -21,7 +21,7 @@ from .utils import check_for_update, get_colored_logger
 
 def create_arguments_parser():
     """
-    Define the command-line arguments pytr requires.
+    Define the command-line arguments yapytr requires.
 
     Returns:
         An ArgumentParser object.
@@ -65,9 +65,9 @@ def create_arguments_parser():
 
     sub_parsers.add_parser(
         "clean",
-        help="clean pytr settings",
+        help="clean yapytr settings",
         description="Delete the credentials file "
-        + "and cookie file as well as the pytr settings folder.",
+        + "and cookie file as well as the yapytr settings folder.",
     )
 
     parser_completion = sub_parsers.add_parser(
@@ -190,8 +190,8 @@ def create_arguments_parser():
 
     sub_parsers.add_parser(
         "version",
-        help="show pytr version",
-        description="Shows the current version of pytr.",
+        help="show yapytr version",
+        description="Shows the current version of yapytr.",
     )
 
     return main_parser
@@ -199,7 +199,7 @@ def create_arguments_parser():
 
 def main():
     """
-    Pytr main() function.
+    Yapytr main() function.
     """
     parser = create_arguments_parser()
     args = parser.parse_args()

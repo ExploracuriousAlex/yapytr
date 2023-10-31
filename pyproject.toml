@@ -1,8 +1,8 @@
 [project]
-name = "pytr"
-version = "0.2.0"
+name = "yapytr"
+version = "0.1.0"
 authors = [
-    {name = "ExploracuriousAlex", email = "abc@def.com"},
+    {name = "ExploracuriousAlex"},
 ]
 description = "Use TradeRepublic in terminal"
 readme = "README.md"
@@ -29,4 +29,4 @@ dependencies = [
 ]
 
 [project.scripts]
-pytr = "pytr.__main__:main"
+yapytr = "yapytr.__main__:main"

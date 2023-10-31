@@ -4,7 +4,7 @@ Module providing the Alarms class for Trade Republic price alarm handling.
 import asyncio
 from datetime import datetime
 
-from pytr.utils import json_preview
+from yapytr.utils import json_preview
 
 
 class Alarms:

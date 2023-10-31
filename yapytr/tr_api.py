@@ -40,7 +40,7 @@ from ecdsa.util import sigencode_der
 from .utils import get_colored_logger
 
 home = pathlib.Path.home()
-BASE_DIR = home / ".pytr"
+BASE_DIR = home / ".yapytr"
 CREDENTIALS_FILE = BASE_DIR / "credentials"
 KEY_FILE = BASE_DIR / "keyfile.pem"
 COOKIES_FILE = BASE_DIR / "cookies.txt"

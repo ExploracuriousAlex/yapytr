@@ -1,5 +1,5 @@
 """
-Module providing some helper functions for pytr.
+Module providing some helper functions for yapytr.
 """
 
 import json
@@ -36,7 +36,7 @@ def get_colored_logger(name=__name__, verbosity=None):
         else:
             raise RuntimeError("Verbosity has already been set.")
 
-    shortname = name.replace("pytr.", "")
+    shortname = name.replace("yapytr.", "")
 
     logger = logging.getLogger(shortname)
 
@@ -117,13 +117,13 @@ def check_for_update():
 
     log = get_colored_logger(__name__)
 
-    installed_version = version("pytr")
+    installed_version = version("yapytr")
 
-    log.info("You have installed pytr %s.", installed_version)
+    log.info("You have installed yapytr %s.", installed_version)
 
     try:
         r = requests.get(
-            "https://api.github.com/repos/ExploracuriousAlex/pytr/tags", timeout=1
+            "https://api.github.com/repos/ExploracuriousAlex/yapytr/tags", timeout=1
         )
     except Exception:  # pylint: disable=broad-exception-caught
         log.exception("Could not determine the latest version from the server.")
@@ -137,12 +137,12 @@ def check_for_update():
 
     latest_version = r.json()[0]["name"]
 
-    log.info("The latest pytr version on the server is %s.", latest_version)
+    log.info("The latest yapytr version on the server is %s.", latest_version)
 
     if parse_version(installed_version) < parse_version(latest_version):
-        log.warning("Your pytr version is outdated.")
+        log.warning("Your yapytr version is outdated.")
     else:
-        log.info("Your pytr version is up to date. ")
+        log.info("Your yapytr version is up to date. ")
 
 
 def enhanced_input(message, pattern=None, err_msg="Pattern matching failed."):
