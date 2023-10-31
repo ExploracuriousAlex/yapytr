@@ -1,75 +1,103 @@
+"""
+Module providing the Portfolio class for checking the Trade Republic portfolio.
+"""
 import asyncio
-from pytr.utils import preview
+from .utils import json_preview, get_colored_logger
 
 
 class Portfolio:
-    def __init__(self, tr):
-        self.tr = tr
+    """
+    Class for checking the Trade Republic portfolio.
+    """
+    def __init__(self, tr_api):
+        self.tr_api = tr_api
+        self.portfolio = None
+        self.cash = None
 
     async def portfolio_loop(self):
+        """
+        Requests portfolio and cash information from Trade Republic websocket and
+        saves them upon receipt.
+        """
         recv = 0
-        await self.tr.portfolio()
-        await self.tr.cash()
-        # await self.tr.available_cash_for_payout()
+
+        await self.tr_api.portfolio()
+
+        await self.tr_api.cash()
+
+        # await self.tr_api.available_cash_for_payout()
 
         while True:
-            _subscription_id, subscription, response = await self.tr.recv()
+            _subscription_id, subscription, response = await self.tr_api.recv()
 
-            if subscription['type'] == 'compactPortfolio':
+            if subscription["type"] == "compactPortfolio":
                 recv += 1
                 self.portfolio = response
-            elif subscription['type'] == 'cash':
+
+            elif subscription["type"] == "cash":
                 recv += 1
+
                 self.cash = response
+
             # elif subscription['type'] == 'availableCashForPayout':
+
             #     recv += 1
+
             #     self.payoutCash = response
             else:
-                print(f"unmatched subscription of type '{subscription['type']}':\n{preview(response)}")
+                print(
+                    f"unmatched subscription of type '{subscription['type']}'"
+                    +f":\n{json_preview(response)}"
+                )
 
             if recv == 2:
                 return
 
-    def overview(self):
-        for x in ['netValue', 'unrealisedProfit', 'unrealisedProfitPercent', 'unrealisedCost']:
-            print(f'{x:24}: {self.portfolio[x]:>10.2f}')
+    def print_portfolio(self):
+        """
+        Print the portfolio.
+        """
+
+        log = get_colored_logger(__name__)
+
+        log.debug(self.portfolio)
+
         print()
 
-        print('ISIN            avgCost *   quantity =    buyCost ->   netValue       diff   %-diff')
-        totalBuyCost = 0.0
-        totalNetValue = 0.0
-        positions = self.portfolio['positions']
-        for pos in sorted(positions, key=lambda x: x['netValue'], reverse=True):
-            buyCost = pos['unrealisedAverageCost'] * pos['netSize']
-            diff = pos['netValue'] - buyCost
-            if buyCost == 0:
-                diffP = 0.0
-            else:
-                diffP = ((pos['netValue'] / buyCost) - 1) * 100
-            totalBuyCost += buyCost
-            totalNetValue += pos['netValue']
+        print(
+            f"{"ISIN".ljust(12)}  {"quantity".rjust(12)}  {"avg. buying price".rjust(20)}  "
+            +f"{"total buying costs".rjust(20)}"
+        )
+
+        positions = self.portfolio["positions"]
+
+        for pos in sorted(positions, key=lambda x: float(x["netSize"]), reverse=True):
+
+            net_size = float(pos["netSize"])
+            average_buy_in = float(pos["averageBuyIn"])
+
+            buy_costs = net_size * average_buy_in
 
             print(
-                f"{pos['instrumentId']} {pos['unrealisedAverageCost']:>10.2f} * {pos['netSize']:>10.2f}"
-                + f" = {buyCost:>10.2f} -> {pos['netValue']:>10.2f} {diff:>10.2f} {diffP:>7.1f}%"
+                f"{pos['instrumentId']:<12}  {net_size:>12.2f}  {average_buy_in:>20.2f}  "
+                +f"{buy_costs:>20.2f}"
             )
 
-        print('ISIN            avgCost *   quantity =    buyCost ->   netValue       diff   %-diff')
         print()
 
-        diff = totalNetValue - totalBuyCost
-        if totalBuyCost == 0:
-            diffP = 0.0
-        else:
-            diffP = ((totalNetValue / totalBuyCost) - 1) * 100
-        print(f'Depot {totalBuyCost:>43.2f} -> {totalNetValue:>10.2f} {diff:>10.2f} {diffP:>7.1f}%')
+        cash_amount = float(self.cash[0]["amount"])
+        currency = self.cash[0]["currencyId"]
 
-        cash = self.cash[0]['amount']
-        currency = self.cash[0]['currencyId']
-        print(f'Cash {currency} {cash:>40.2f} -> {cash:>10.2f}')
-        print(f'Total {cash+totalBuyCost:>43.2f} -> {cash+totalNetValue:>10.2f}')
+        print(f"Cash:{cash_amount:>12.2f} {currency}")
+
+        print()
 
     def get(self):
+        """
+        Executes the query of portfolio and cash information asynchronously until it is finished.
+
+        Triggers the data to be output when ready.
+        """
         asyncio.get_event_loop().run_until_complete(self.portfolio_loop())
 
-        self.overview()
+        self.print_portfolio()

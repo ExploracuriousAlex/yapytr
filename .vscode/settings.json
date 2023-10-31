@@ -1,0 +1,11 @@
+{
+    "files.eol": "\n",
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.black-formatter",
+        "editor.formatOnSave": true
+    },
+    "autoDocstring.docstringFormat": "google-notypes",
+    "autoDocstring.includeExtendedSummary": true,
+    "autoDocstring.startOnNewLine": true,
+    "pylint.importStrategy": "fromEnvironment"
+}

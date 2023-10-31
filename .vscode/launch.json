@@ -2,67 +2,317 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "details",
+      "name": "_pytr: pytr",
       "type": "python",
       "request": "launch",
       "module": "pytr",
-      "args": ["-v", "debug", "details", "DE0006231004"]
+      "args": []
     },
     {
-      "name": "portfolio",
+      "name": "_pytr: pytr -h",
       "type": "python",
       "request": "launch",
       "module": "pytr",
-      "args": ["-v", "debug", "portfolio"]
+      "args": [
+        "-h"
+      ]
     },
     {
-      "name": "get_price_alarms",
+      "name": "_pytr: pytr -v debug",
       "type": "python",
       "request": "launch",
       "module": "pytr",
-      "args": ["-v", "debug", "get_price_alarms"]
+      "args": [
+        "-v",
+        "debug"
+      ]
     },
     {
-      "name": "set_price_alarms",
+      "name": "account_info: pytr -v debug account_info -h",
       "type": "python",
       "request": "launch",
       "module": "pytr",
-      "args": ["-v", "debug", "set_price_alarms"]
+      "args": [
+        "-v",
+        "debug",
+        "account_info",
+        "-h"
+      ]
     },
     {
-      "name": "login",
+      "name": "account_info: pytr account_info",
       "type": "python",
       "request": "launch",
       "module": "pytr",
-      "args": ["-v", "debug", "login"]
+      "args": [
+        "account_info"
+      ]
     },
     {
-      "name": "dl_docs debug",
+      "name": "account_info: pytr account_info -h",
       "type": "python",
       "request": "launch",
       "module": "pytr",
-      "args": ["-v", "debug", "dl_docs", "dldocs_debug"]
+      "args": [
+        "account_info",
+        "-h"
+      ]
     },
     {
-      "name": "dl_docs",
+      "name": "clean: pytr -v debug clean",
       "type": "python",
       "request": "launch",
       "module": "pytr",
-      "args": ["dl_docs", "dldocs"]
+      "args": [
+        "-v",
+        "debug",
+        "clean"
+      ]
     },
     {
-      "name": "dl_docs 20 days",
+      "name": "clear: pytr clean",
       "type": "python",
       "request": "launch",
       "module": "pytr",
-      "args": ["dl_docs", "dldocs", "--last_days", "20"]
+      "args": [
+        "clean"
+      ]
     },
     {
-      "name": "dl_docs 2 days debug",
+      "name": "clear: pytr clean -h",
       "type": "python",
       "request": "launch",
       "module": "pytr",
-      "args": ["-v", "debug", "dl_docs", "dldocs_debug", "--last_days", "2"]
+      "args": [
+        "clean",
+        "-h"
+      ]
+    },
+    {
+      "name": "completion: pytr -v debug completion",
+      "type": "python",
+      "request": "launch",
+      "module": "pytr",
+      "args": [
+        "-v",
+        "debug",
+        "completion"
+      ]
+    },
+    {
+      "name": "completion: pytr completion",
+      "type": "python",
+      "request": "launch",
+      "module": "pytr",
+      "args": [
+        "completion"
+      ]
+    },
+    {
+      "name": "completion: pytr completion -h",
+      "type": "python",
+      "request": "launch",
+      "module": "pytr",
+      "args": [
+        "completion",
+        "-h"
+      ]
+    },
+    {
+      "name": "details: pytr -v debug details",
+      "type": "python",
+      "request": "launch",
+      "module": "pytr",
+      "args": [
+        "-v",
+        "debug",
+        "details"
+      ]
+    },
+    {
+      "name": "details: pytr -v debug details US0378331005",
+      "type": "python",
+      "request": "launch",
+      "module": "pytr",
+      "args": [
+        "-v",
+        "debug",
+        "details",
+        "DE0007236101"
+      ]
+    },
+    {
+      "name": "details: pytr details -h",
+      "type": "python",
+      "request": "launch",
+      "module": "pytr",
+      "args": [
+        "details",
+        "-h"
+      ]
+    },
+    {
+      "name": "dl_docs: pytr -v debug dl_docs doc_folder_debug",
+      "type": "python",
+      "request": "launch",
+      "module": "pytr",
+      "args": [
+        "-v",
+        "debug",
+        "dl_docs",
+        "doc_folder_debug"
+      ]
+    },
+    {
+      "name": "dl_docs: pytr -v debug dl_docs doc_folder_debug --last_days 2",
+      "type": "python",
+      "request": "launch",
+      "module": "pytr",
+      "args": [
+        "-v",
+        "debug",
+        "dl_docs",
+        "doc_folder_debug",
+        "--last_days",
+        "2"
+      ]
+    },
+    {
+      "name": "dl_docs: pytr dl_docs -h",
+      "type": "python",
+      "request": "launch",
+      "module": "pytr",
+      "args": [
+        "dl_docs",
+        "-h"
+      ]
+    },
+    {
+      "name": "dl_docs: pytr dl_docs doc_folder",
+      "type": "python",
+      "request": "launch",
+      "module": "pytr",
+      "args": [
+        "dl_docs",
+        "doc_folder"
+      ]
+    },
+    {
+      "name": "dl_docs: pytr dl_docs doc_folder --last_days 20",
+      "type": "python",
+      "request": "launch",
+      "module": "pytr",
+      "args": [
+        "dl_docs",
+        "doc_folder",
+        "--last_days",
+        "20"
+      ]
+    },
+    {
+      "name": "login: pytr -v debug login",
+      "type": "python",
+      "request": "launch",
+      "module": "pytr",
+      "args": [
+        "-v",
+        "debug",
+        "login"
+      ]
+    },
+    {
+      "name": "login: pytr login -h",
+      "type": "python",
+      "request": "launch",
+      "module": "pytr",
+      "args": [
+        "login",
+        "-h"
+      ]
+    },
+    {
+      "name": "portfolio: pytr -v debug portfolio",
+      "type": "python",
+      "request": "launch",
+      "module": "pytr",
+      "args": [
+        "-v",
+        "debug",
+        "portfolio"
+      ]
+    },
+    {
+      "name": "portfolio: pytr portfolio -h",
+      "type": "python",
+      "request": "launch",
+      "module": "pytr",
+      "args": [
+        "portfolio",
+        "-h"
+      ]
+    },
+    {
+      "name": "set_price_alarms: pytr -v debug set_price_alarms",
+      "type": "python",
+      "request": "launch",
+      "module": "pytr",
+      "args": [
+        "-v",
+        "debug",
+        "set_price_alarms"
+      ]
+    },
+    {
+      "name": "set_price_alarms: pytr set_price_alarms -h",
+      "type": "python",
+      "request": "launch",
+      "module": "pytr",
+      "args": [
+        "set_price_alarms",
+        "-h"
+      ]
+    },
+    {
+      "name": "show_price_alarms: pytr -v debug show_price_alarms",
+      "type": "python",
+      "request": "launch",
+      "module": "pytr",
+      "args": [
+        "-v",
+        "debug",
+        "show_price_alarms"
+      ]
+    },
+    {
+      "name": "show_price_alarms: pytr show_price_alarms -h",
+      "type": "python",
+      "request": "launch",
+      "module": "pytr",
+      "args": [
+        "show_price_alarms",
+        "-h"
+      ]
+    },
+    {
+      "name": "version: pytr -v debug version",
+      "type": "python",
+      "request": "launch",
+      "module": "pytr",
+      "args": [
+        "-v",
+        "debug",
+        "version"
+      ]
+    },
+    {
+      "name": "version: pytr version -h",
+      "type": "python",
+      "request": "launch",
+      "module": "pytr",
+      "args": [
+        "version",
+        "-h"
+      ]
     }
   ]
 }
