@@ -130,7 +130,7 @@ class Portfolio:
         total_buy_cost = 0.0
         total_net_value = 0.0
         positions = self.compact_portfolio["positions"]
-        for pos in sorted(positions, key=lambda x: x["netSize"], reverse=True):
+        for pos in sorted(positions, key=lambda x: float(x["netSize"]), reverse=True):
             buy_cost = float(pos["averageBuyIn"]) * float(pos["netSize"])
             diff = float(pos["netValue"]) - buy_cost
             if buy_cost == 0:
