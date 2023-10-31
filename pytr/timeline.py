@@ -1,54 +1,73 @@
+"""
+
+
+Module with functions to retrieve timeline and timeline detail information from Trade Republic.
+"""
+
+
 import json
 from datetime import datetime
+
+
 from locale import getlocale
+
 
 from .utils import get_colored_logger
 
 
 class Timeline:
-    def __init__(self, tr):
-        self.tr = tr
+    """
+
+
+    Class containing functions to retrieve timeline and timeline detail information from Trade Republic.
+
+
+
+    Stores timeline events for further processing.
+    """
+
+    def __init__(self, tr_api):
+        self.tr_api = tr_api
 
         self.log = get_colored_logger(__name__)
+
+        self.num_timelines = 0
+
+        self.num_timeline_details = 0
 
         self.received_detail = 0
 
         self.requested_detail = 0
 
-        self.num_timeline_details = 0
-
-        self.events_without_docs = []
+        self.timeline_events = []
 
         self.events_with_docs = []
 
-        self.num_timelines = 0
+        self.events_without_docs = []
 
-        self.timeline_events = []
+        self.processed_doc_ids = []
 
-    async def get_next_timeline(self, response=None, max_age_timestamp=0):
+    async def get_timeline(self, response=None, max_age_timestamp=0):
         """
+        Retrieves a part of the Trade Republic timeline.
 
-        Get timelines and save time in list timelines.
+        Also requests the next timeline part and triggers processing the timeline events.
 
-        Extract timeline events and save them in list timeline_events
-
+        Args:
+            response: The response of the server with the previous timeline. Defaults to None.
+            max_age_timestamp: Maximum age for data to be fetched. Defaults to 0.
         """
 
         if response is None:
             # empty response / first timeline
 
-            self.log.info("Awaiting #1  timeline")
+            self.log.info("Awaiting timeline part 1.")
+            await self.tr_api.timeline()
 
-            # self.timelines = []
-
-            await self.tr.timeline()
         else:
             timestamp = response["data"][-1]["data"]["timestamp"]
 
             self.num_timelines += 1
-
-            # print(json.dumps(response))
-
             self.num_timeline_details += len(response["data"])
 
             for event in response["data"]:
@@ -59,36 +78,43 @@ class Timeline:
             if after is None:
                 # last timeline is reached
 
-                self.log.info("Received #%-2s (last) timeline", self.num_timelines)
+                self.log.info(
+                    "Received timeline part %s (last part).", self.num_timelines
+                )
 
                 await self._get_timeline_details(5)
 
             elif max_age_timestamp != 0 and timestamp < max_age_timestamp:
-                self.log.info("Received #%-2s timeline", self.num_timelines + 1)
+                self.log.info("Received timeline part %s.", self.num_timelines + 1)
 
-                self.log.info("Reached last relevant timeline")
+                self.log.info(
+                    "Reached last relevant timeline part according to your --last_days configuration."
+                )
 
                 await self._get_timeline_details(5, max_age_timestamp=max_age_timestamp)
+
             else:
                 self.log.info(
-                    "Received #%-2s timeline, awaiting #%-2s timeline",
+                    "Received timeline part %s, awaiting timeline part %s.",
                     self.num_timelines,
                     self.num_timelines + 1,
                 )
 
-                await self.tr.timeline(after)
+                await self.tr_api.timeline(after)
 
     async def _get_timeline_details(self, num_torequest, max_age_timestamp=0):
         """
+        Initiates the query of timeline details for defined number of timeline events.
 
-        request timeline details
+        Args:
+            num_torequest: Number of timline events to be processed to retrieve timeline details.
+            max_age_timestamp: Maximum age for data to be fetched. Defaults to 0.
         """
 
         while num_torequest > 0:
             if len(self.timeline_events) == 0:
                 self.log.info("All timeline details requested")
-
-                return False
+                return
 
             else:
                 event = self.timeline_events.pop()
@@ -133,6 +159,7 @@ class Timeline:
 
             if msg == "":
                 self.events_with_docs.append(event)
+
             else:
                 self.events_without_docs.append(event)
 
@@ -151,15 +178,21 @@ class Timeline:
 
             self.requested_detail += 1
 
-            await self.tr.timeline_detail(event["data"]["id"])
+            await self.tr_api.timeline_detail(event["data"]["id"])
 
-    async def timeline_detail(self, response, dl, max_age_timestamp=0):
+    async def process_timeline_detail(self, response, dl, max_age_timestamp=0):
         """
+        Processes timeline details for extraction and export of data.
 
-        process timeline response and request timelines
+        Args:
+            response: Received time line detail from Trade Republic websocket.
+            dl: The DL object that takes care of document downloads.
+            max_age_timestamp: Maximum age for data to be fetched. Defaults to 0.
         """
 
         self.received_detail += 1
+
+        self.log.debug("Received Timeline Detail %s.", self.received_detail)
 
         # when all requested timeline events are received request 5 new
 
@@ -168,6 +201,7 @@ class Timeline:
 
             if remaining < 5:
                 await self._get_timeline_details(remaining)
+
             else:
                 await self._get_timeline_details(5)
 
@@ -177,6 +211,7 @@ class Timeline:
 
         if response["subtitleText"] == "Sparplan":
             is_savings_plan = True
+
         else:
             # some savingsPlan don't have the subtitleText == 'Sparplan' but there are actions just for savingsPans
 
@@ -195,6 +230,7 @@ class Timeline:
 
         if response["subtitleText"] != "Sparplan" and is_savings_plan is True:
             savings_plan_fmt = " -- SPARPLAN"
+
         else:
             savings_plan_fmt = ""
 
@@ -208,6 +244,14 @@ class Timeline:
         for section in response["sections"]:
             if section["type"] == "documents":
                 for doc in section["documents"]:
+                    if doc["id"] in self.processed_doc_ids:
+                        self.log.debug(
+                            "Document with id '%s' was already processed. Skipping..."
+                        )
+                        continue
+
+                    self.processed_doc_ids.append(doc["id"])
+
                     try:
                         timestamp = (
                             datetime.strptime(doc["detail"], "%d.%m.%Y").timestamp()
@@ -227,6 +271,7 @@ class Timeline:
                                 response["subtitleText"],
                                 subfolder="Sparplan",
                             )
+
                         else:
                             # In case of a stock transfer (Wertpapierübertrag) add additional information to the document title
 
@@ -242,13 +287,14 @@ class Timeline:
                                     response["titleText"] + " - " + body,
                                     response["subtitleText"],
                                 )
+
                             else:
                                 dl.update_download_list(
                                     doc, response["titleText"], response["subtitleText"]
                                 )
 
         if self.received_detail == self.num_timeline_details:
-            self.log.info("Received all details")
+            self.log.info("All timeline details have been received.")
 
             dl.output_path.mkdir(parents=True, exist_ok=True)
 
@@ -285,6 +331,7 @@ def export_transactions(input_path, output_path, lang="auto"):
 
         if locale is None:
             lang = "en"
+
         else:
             lang = locale.split("_")[0]
 

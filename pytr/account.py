@@ -1,3 +1,6 @@
+"""
+Module provoding the login logic for the Trade Republic account.
+"""
 import json
 import sys
 import time
@@ -6,17 +9,23 @@ from pygments import highlight
 from pygments.formatters.terminal import TerminalFormatter
 from pygments.lexers.data import JsonLexer
 
-from .tr_api import CREDENTIALS_FILE, COOKIES_FILE, BASE_DIR, TradeRepublicApi
-from .utils import get_colored_logger, enhanced_input
+from .tr_api import BASE_DIR, COOKIES_FILE, CREDENTIALS_FILE, TradeRepublicApi
+from .utils import enhanced_input, get_colored_logger
 
 
-def get_settings(tr):
-    formatted_json = json.dumps(tr.settings(), indent=2)
+def print_information(tr_api):
+    """
+    Print Trade Republic account information.
+
+    Args:
+        tr_api: A TradeRepublicApi object in logged in state.
+    """
+    formatted_json = json.dumps(tr_api.settings(), indent=2)
     if sys.stdout.isatty():
         colorful_json = highlight(formatted_json, JsonLexer(), TerminalFormatter())
-        return colorful_json
+        print(colorful_json)
     else:
-        return formatted_json
+        print(formatted_json)
 
 
 def login(phone_no=None, pin=None):
@@ -27,8 +36,8 @@ def login(phone_no=None, pin=None):
     If no parameters are set but are needed then ask for input.
 
     Args:
-        phone_no: _description_. Defaults to None.
-        pin: _description_. Defaults to None.
+        phone_no: Your phone number used for Trade Republic. Defaults to None.
+        pin: Your Trade Republic pin. Defaults to None.
 
     Returns:
         TradeRepublicApi object.
@@ -68,7 +77,7 @@ def login(phone_no=None, pin=None):
                 "Invalid pin format!",
             )
 
-        save = input('Save credentials? Type "y" to save credentials: ')
+        save = enhanced_input('Save credentials? Type "y" to save credentials: ')
 
         if save.lower() == "y":
             with open(CREDENTIALS_FILE, mode="w", encoding="utf-8") as f:
@@ -80,14 +89,14 @@ def login(phone_no=None, pin=None):
             save_cookies = False
             log.info("Credentials not saved")
 
-    tr = TradeRepublicApi(phone_no=phone_no, pin=pin, save_cookies=save_cookies)
+    tr_api = TradeRepublicApi(phone_no=phone_no, pin=pin, save_cookies=save_cookies)
 
     # Use same login as app.traderepublic.com
-    if tr.resume_websession():
+    if tr_api.resume_websession():
         log.info("Web session resumed")
     else:
         try:
-            countdown = tr.inititate_weblogin()
+            countdown = tr_api.inititate_weblogin()
         except ValueError as e:
             log.fatal(str(e))
             exit(1)
@@ -96,7 +105,7 @@ def login(phone_no=None, pin=None):
         print(
             f"Enter nothing if you want to receive the (same) code as SMS. (Countdown: {countdown})"
         )
-        code = input("Code: ")
+        code = enhanced_input("Code: ")
         if code == "":
             countdown = countdown - (time.time() - request_time)
             for remaining in range(int(countdown)):
@@ -106,13 +115,16 @@ def login(phone_no=None, pin=None):
                 )
                 time.sleep(1)
             print()
-            tr.resend_weblogin()
-            code = input("SMS requested. Enter the confirmation code:")
-        tr.complete_weblogin(code)
+            tr_api.resend_weblogin()
+            code = enhanced_input(
+                "SMS requested. Enter the confirmation code: ",
+                "[0-9]{4}",
+                "Invalid code. The Trade Republic verification code consists of 4 digits.",
+            )
+        tr_api.complete_weblogin(code)
 
     log.info("Logged in")
-    # log.debug(get_settings(tr))
-    return tr
+    return tr_api
 
 
 def clean():

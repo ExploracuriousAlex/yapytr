@@ -5,37 +5,37 @@ from .utils import json_preview
 
 
 class Details:
-    def __init__(self, tr, isin):
-        self.tr = tr
+    def __init__(self, tr_api, isin):
+        self.tr_api = tr_api
         self.isin = isin
 
     async def details_loop(self):
         recv = 0
 
-        await self.tr.stock_details(self.isin)
+        await self.tr_api.stock_details(self.isin)
 
-        await self.tr.news(self.isin)
+        await self.tr_api.news(self.isin)
 
-        # await self.tr.subscribe_news(self.isin)
+        # await self.tr_api.subscribe_news(self.isin)
 
-        await self.tr.ticker(self.isin, exchange="LSX")
+        await self.tr_api.ticker(self.isin, exchange="LSX")
 
-        await self.tr.performance(self.isin, exchange="LSX")
+        await self.tr_api.performance(self.isin, exchange="LSX")
 
-        await self.tr.instrument_details(self.isin)
+        await self.tr_api.instrument_details(self.isin)
 
-        await self.tr.instrument_suitability(self.isin)
+        await self.tr_api.instrument_suitability(self.isin)
 
-        # await self.tr.add_watchlist(self.isin)
+        # await self.tr_api.add_watchlist(self.isin)
 
-        # await self.tr.remove_watchlist(self.isin)
+        # await self.tr_api.remove_watchlist(self.isin)
 
-        # await self.tr.savings_plan_parameters(self.isin)
+        # await self.tr_api.savings_plan_parameters(self.isin)
 
-        # await self.tr.unsubscribe_news(self.isin)
+        # await self.tr_api.unsubscribe_news(self.isin)
 
         while True:
-            _subscription_id, subscription, response = await self.tr.recv()
+            _subscription_id, subscription, response = await self.tr_api.recv()
 
             if subscription["type"] == "stockDetails":
                 recv += 1

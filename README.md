@@ -9,7 +9,7 @@ Use at your own risk!
 
 ## Installation
 
-Clone the repo and install with e.g. pip:
+Clone the repo and install e.g. with pip:
 
 ```sh
 git clone https://github.com/ExploracuriousAlex/pytr.git
@@ -21,38 +21,28 @@ pip install .
 
 ```
 $ pytr help
-usage: pytr [-h] [-v {warning,info,debug}] [-V]
-            {help,login,dl_docs,portfolio,details,get_price_alarms,set_price_alarms,export_transactions,completion}
-            ...
+usage: pytr [-h] [-v {debug,info,warning}] {login,dl_docs,portfolio,details,version,get_price_alarms,set_price_alarms,export_transactions,completion,clean} ...
 
-Use "pytr command_name --help" to get detailed help to a specific command
+This program provides an alternative access to Trade Republic via the console.
 
-Commands:
-  {help,login,dl_docs,portfolio,details,get_price_alarms,set_price_alarms,export_transactions,completion}
-                         Desired action to perform
-    help                 Print this help message
-    login                Check if credentials file exists. If not create it
-                         and ask for input. Try to login. Ask for device reset
-                         if needed
-    dl_docs              Download all pdf documents from the timeline and sort
-                         them into folders. Also export account transactions
-                         (account_transactions.csv) and JSON files with all
-                         events (events_with_documents.json and
-                         other_events.json
-    portfolio            Show current portfolio
-    details              Get details for an ISIN
-    get_price_alarms     Get overview of current price alarms
-    set_price_alarms     Set price alarms based on diff from current price
-    export_transactions  Create a CSV with the deposits and removals ready for
-                         importing into Portfolio Performance
-    completion           Print shell tab completion
+options:
+  -h, --help                  show this help message and exit
+  -v {debug,info,warning}, --verbosity {debug,info,warning}
+                              Set verbosity level (default: info)
 
-Options:
-  -h, --help             show this help message and exit
-  -v {warning,info,debug}, --verbosity {warning,info,debug}
-                         Set verbosity level (default: info)
-  -V, --version          Print version information and quit
-
+commands:
+  {account_info,clean,completion,details,dl_docs,export_transactions,login,portfolio,set_price_alarms,show_price_alarms,version}
+    account_info              show account information
+    clean                     clean pytr settings
+    completion                show shell completion script
+    details                   show details for an ISIN
+    dl_docs                   download documents
+    export_transactions       export transactions for Portfolio Performance
+    login                     login to Trade Republic
+    portfolio                 show portfolio
+    set_price_alarms          set price alarms
+    show_price_alarms         show price alarms
+    version                   show pytr version
 ```
 
 ## Authentication

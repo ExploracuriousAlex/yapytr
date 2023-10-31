@@ -145,7 +145,7 @@ def check_for_update():
         log.info("Your pytr version is up to date. ")
 
 
-def enhanced_input(message, pattern, err_msg):
+def enhanced_input(message, pattern=None, err_msg="Pattern matching failed."):
     """
     Read a string from standard input and validate.
 
@@ -154,8 +154,8 @@ def enhanced_input(message, pattern, err_msg):
 
     Args:
         message: The string to be prompted.
-        pattern: Regex pattern for validation.
-        err_msg: Message in case the validation fails.
+        pattern: Regex pattern for validation. Defaults to None.
+        err_msg: Message in case the validation fails. Defaults to "Pattern matching failed.".
 
     Returns:
         Validated string.
@@ -178,11 +178,12 @@ def enhanced_input(message, pattern, err_msg):
         except EOFError:
             continue
 
-        regex = re.compile(pattern)
-        match = regex.match(str(input_str))
-        if not match:
-            print(err_msg)
-            continue
+        if pattern is not None:
+            regex = re.compile(pattern)
+            fullmatch = regex.fullmatch(str(input_str))
+            if not fullmatch:
+                print(err_msg)
+                continue
 
         break
     return input_str

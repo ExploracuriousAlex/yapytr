@@ -5,16 +5,16 @@ from datetime import datetime
 
 
 class Alarms:
-    def __init__(self, tr):
-        self.tr = tr
+    def __init__(self, tr_api):
+        self.tr_api = tr_api
 
     async def alarms_loop(self):
         recv = 0
 
-        await self.tr.price_alarm_overview()
+        await self.tr_api.price_alarm_overview()
 
         while True:
-            _subscription_id, subscription, response = await self.tr.recv()
+            _subscription_id, subscription, response = await self.tr_api.recv()
 
             if subscription["type"] == "priceAlarms":
                 recv += 1
@@ -30,10 +30,10 @@ class Alarms:
     async def ticker_loop(self):
         recv = 0
 
-        await self.tr.price_alarm_overview()
+        await self.tr_api.price_alarm_overview()
 
         while True:
-            _subscription_id, subscription, response = await self.tr.recv()
+            _subscription_id, subscription, response = await self.tr_api.recv()
 
             if subscription["type"] == "priceAlarms":
                 recv += 1

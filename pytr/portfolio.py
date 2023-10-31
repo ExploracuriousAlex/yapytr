@@ -3,8 +3,8 @@ from .utils import json_preview, get_colored_logger
 
 
 class Portfolio:
-    def __init__(self, tr):
-        self.tr = tr
+    def __init__(self, tr_api):
+        self.tr_api = tr_api
         self.portfolio = None
         self.cash = None
         
@@ -12,14 +12,14 @@ class Portfolio:
     async def portfolio_loop(self):
         recv = 0
 
-        await self.tr.portfolio()
+        await self.tr_api.portfolio()
 
-        await self.tr.cash()
+        await self.tr_api.cash()
 
-        # await self.tr.available_cash_for_payout()
+        # await self.tr_api.available_cash_for_payout()
 
         while True:
-            _subscription_id, subscription, response = await self.tr.recv()
+            _subscription_id, subscription, response = await self.tr_api.recv()
 
             if subscription["type"] == "compactPortfolio":
                 recv += 1
@@ -79,7 +79,6 @@ class Portfolio:
         print(f"Cash:{cash_amount:>12.2f} {currency}")
 
         print()
-
 
     def get(self):
         asyncio.get_event_loop().run_until_complete(self.portfolio_loop())

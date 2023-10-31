@@ -1,26 +1,20 @@
-from concurrent.futures import as_completed
 import re
-
+from concurrent.futures import as_completed
 from pathlib import Path
 
-
 from pathvalidate import sanitize_filepath
-
+from requests.sessions import Session
 from requests_futures.sessions import FuturesSession
 
-from requests.sessions import Session
-
-
-from .tr_api import TradeRepublicError
-from .utils import json_preview, get_colored_logger
-
 from .timeline import Timeline
+from .tr_api import TradeRepublicError
+from .utils import get_colored_logger, json_preview
 
 
 class DL:
     def __init__(
         self,
-        tr,
+        tr_api,
         output_path,
         filename_fmt,
         since_timestamp=0,
@@ -29,16 +23,28 @@ class DL:
     ):
         """
 
+
+
+
         tr: api object
+
+
+
 
         output_path: name of the directory where the downloaded files are saved
 
+
+
+
         filename_fmt: format string to customize the file names
+
+
+
 
         since_timestamp: downloaded files since this date (unix timestamp)
         """
 
-        self.tr = tr
+        self.tr_api = tr_api
 
         self.output_path = Path(output_path)
 
@@ -50,11 +56,11 @@ class DL:
 
         requests_session = Session()
 
-        if self.tr._weblogin:
-            requests_session.headers = self.tr._default_headers_web
+        if self.tr_api._weblogin:
+            requests_session.headers = self.tr_api._default_headers_web
 
         else:
-            requests_session.headers = self.tr._default_headers
+            requests_session.headers = self.tr_api._default_headers
 
         self.session = FuturesSession(max_workers=max_workers, session=requests_session)
 
@@ -68,7 +74,7 @@ class DL:
 
         self.download_history = []
 
-        self.tl = Timeline(self.tr)
+        self.tl = Timeline(self.tr_api)
 
         self.log = get_colored_logger(__name__)
 
@@ -79,7 +85,13 @@ class DL:
     def read_or_create_download_history(self):
         """
 
+
+
+
         This function attempts to read the document download history.
+
+
+
 
         If the file does not exist, it creates an empty file.
         """
@@ -100,22 +112,22 @@ class DL:
             self.log.info("Successfully generated the document download history file.")
 
     async def dl_loop(self):
-        await self.tl.get_next_timeline(max_age_timestamp=self.since_timestamp)
+        await self.tl.get_timeline(max_age_timestamp=self.since_timestamp)
 
         while True:
             try:
-                _subscription_id, subscription, response = await self.tr.recv()
+                _subscription_id, subscription, response = await self.tr_api.recv()
 
             except TradeRepublicError as e:
                 self.log.fatal(str(e))
 
             if subscription["type"] == "timeline":
-                await self.tl.get_next_timeline(
+                await self.tl.get_timeline(
                     response, max_age_timestamp=self.since_timestamp
                 )
 
             elif subscription["type"] == "timelineDetail":
-                await self.tl.timeline_detail(
+                await self.tl.process_timeline_detail(
                     response, self, max_age_timestamp=self.since_timestamp
                 )
 
@@ -129,7 +141,13 @@ class DL:
     def update_download_list(self, doc, title_text, subtitle_text, subfolder=None):
         """
 
+
+
+
         This function generates a local file destination path based on the document data.
+
+
+
 
         It then saves this path, along with the source URL, in the download list for later download.
         """
@@ -143,6 +161,8 @@ class DL:
         iso_date = "-".join(date.split(".")[::-1])
 
         doc_id = doc["id"]
+
+        self.log.debug("Try adding doc with id '%s' to download list...", doc_id)
 
         # extract time from subtitleText
 
@@ -238,6 +258,7 @@ class DL:
         """
 
 
+
         Download the documents from the download list.
         """
 
@@ -290,6 +311,9 @@ class DL:
 
     def work_responses(self):
         """
+
+
+
 
 
         process responses of async requests

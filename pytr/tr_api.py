@@ -25,19 +25,19 @@ import base64
 import hashlib
 import json
 import pathlib
+import ssl
 import time
 import urllib.parse
 import uuid
-import certifi
-import ssl
-import requests
-import websockets
-from ecdsa import NIST256p, SigningKey
-from ecdsa.util import sigencode_der
 from http.cookiejar import MozillaCookieJar
 
-from pytr.utils import get_colored_logger
+import certifi
+import requests
+import websockets.client
+from ecdsa import NIST256p, SigningKey
+from ecdsa.util import sigencode_der
 
+from .utils import get_colored_logger
 
 home = pathlib.Path.home()
 BASE_DIR = home / ".pytr"
@@ -280,7 +280,7 @@ class TradeRepublicApi:
             }
             connect_id = 28
 
-        self._ws = await websockets.connect(
+        self._ws = await websockets.client.connect(
             "wss://api.traderepublic.com", ssl=ssl_context, extra_headers=extra_headers
         )
         await self._ws.send(f"connect {connect_id} {json.dumps(connection_message)}")
