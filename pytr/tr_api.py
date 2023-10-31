@@ -398,7 +398,7 @@ class TradeRepublicApi:
             self._receive_one(fut, timeout=timeout)
         )
 
-    async def portfolio(self):
+    async def compact_portfolio(self):
         return await self.subscribe({"type": "compactPortfolio"})
 
     async def watchlist(self):
