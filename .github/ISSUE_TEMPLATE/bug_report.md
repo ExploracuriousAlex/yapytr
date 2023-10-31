@@ -2,36 +2,31 @@
 name: Bug report
 about: Create a report to help us improve
 title: ''
-labels: bug
+labels: ''
 assignees: ''
 
 ---
 
-**Description of the bug**
+**Describe the bug**
 A clear and concise description of what the bug is.
 
 **To Reproduce**
 Steps to reproduce the behavior:
-
-1. Go to '...'
-2. Ran the command `pytr ....`
-3. Do '....'
-4. See error
+1. Run `pytr ...`
+2. See error
 
 **Expected behavior**
 A clear and concise description of what you expected to happen.
 
-**Error log**
+**Logs**
+If possible, retry with `pytr -v debug ...` to make pytr print debug information and add the logs to help explain your problem.
 
-```
-Insert
-here
-```
+**EnvironmentDesktop (please complete the following information):**
+ - OS: [e.g. Windows]
+ - Version [e.g. 0.2.0, use `pytr version` to check your version]
+ - Python Version [e.g. 13.2.0]
 
-**Environment**
 
-- OS: [e.g. Linux]
-- pytr version: [e.g. `0.0.15`, use `pytr -V` to get your version]
 
 **Additional context**
 Add any other context about the problem here.
