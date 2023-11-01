@@ -1,50 +1,68 @@
 """
-Module providing the Alarms class for Trade Republic price alarm handling.
+An Alarms class.
 """
 import asyncio
 from datetime import datetime
 
-from yapytr.utils import json_preview
+from .utils import json_preview, get_colored_logger
 
 
 class Alarms:
     """
-    Class for handling Trade Republic price alarms.
+    Class to receive and print price alarms from Trade Republic.
     """
 
     def __init__(self, tr_api):
-        self.tr_api = tr_api
-        self.alarms = None
+        """Initializes the instance.
 
-    async def alarms_loop(self):
+        Args:
+          tr_api: The `TradeRepublicApi` object to be used to interact with Trade Republic.
         """
-        Requests price alerts from Trade Republic websocket and saves them upon receipt.
+        self._log = get_colored_logger(__name__)
+        self._tr_api = tr_api
+        self._alarms = None
+
+    async def _alarms_loop(self):
         """
-        recv = 0
+        Receive price alarms.
 
-        await self.tr_api.price_alarm_overview()
+        Subscribe to priceAlarms from Trade Republic websocket.
+        Save it in the `Alarms` object upon receipt and unsubscribe.
+        """
 
-        while True:
-            _subscription_id, subscription, response = await self.tr_api.recv()
+        await self._tr_api.price_alarm_overview()
+
+        # define flags to control the loop
+        flag_price_alarms_received = 1  # 2^0
+
+        receiption_status = 0
+
+        desired_receiption_status = 0
+        desired_receiption_status |= flag_price_alarms_received
+
+        while receiption_status != desired_receiption_status:
+            subscription_id, subscription, response = await self._tr_api.recv()
 
             if subscription["type"] == "priceAlarms":
-                recv += 1
-                self.alarms = response
+                receiption_status |= flag_price_alarms_received
+                self._alarms = response
             else:
-                print(
-                    f"unmatched subscription of type '{subscription['type']}'"
-                    + f":\n{json_preview(response)}"
+                self._log.debug(
+                    "unmatched subscription of type '%s':\n%s",
+                    subscription["type"],
+                    json_preview(response),
                 )
 
-            if recv == 1:
-                return
+            await self._tr_api.unsubscribe(subscription_id)
 
-    def overview(self):
+    def print_alarms(self):
         """
-        Print the stored price alarms.
+        Print price alarms.
+
+        Print price alarms to the standard output stream.
         """
         print("ISIN         status created  target diff% createdAt        triggeredAT")
-        for a in self.alarms:
+        for a in self._alarms:
             ts = int(a["createdAt"]) / 1000.0
 
             created = datetime.fromtimestamp(ts).isoformat(sep=" ", timespec="minutes")
@@ -71,12 +89,10 @@ class Alarms:
                 + f"{price_difference:>5.1f} {created} {triggered}"
             )
 
-    def get(self):
+    def get_alarms(self):
         """
-        Executes the query of price alarms asynchronously until it is finished.
+        Execute the data receiving loop to receive price alarms.
 
-        Triggers the data to be output when ready.
+        The received data can be printed with `print_alarms` method.
         """
-        asyncio.get_event_loop().run_until_complete(self.alarms_loop())
-
-        self.overview()
+        asyncio.get_event_loop().run_until_complete(self._alarms_loop())

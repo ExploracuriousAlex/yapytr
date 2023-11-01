@@ -227,7 +227,10 @@ def main():
         # TODO: implement set_price_alarms
         log.warning("Not implemented yet")
     elif args.command == "show_price_alarms":
-        Alarms(login(phone_no=args.phone_no, pin=args.pin)).get()
+        tro = login(phone_no=args.phone_no, pin=args.pin)
+        alarms = Alarms(tro)
+        alarms.get_alarms()
+        alarms.print_alarms()
     elif args.command == "details":
         Details(
             login(phone_no=args.phone_no, pin=args.pin),
