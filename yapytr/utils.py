@@ -1,5 +1,5 @@
 """
-Module providing some helper functions for yapytr.
+Helper functions for yapytr.
 """
 
 import json
