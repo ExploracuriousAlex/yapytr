@@ -34,24 +34,24 @@ class Portfolio:
         await self._tr_api.cash()
 
         # define flags to control the loop
-        flag_compact_portfolio = 1  # 2^0
-        flag_cash = 2  # 2^1
+        flag_compact_portfolio_received = 1  # 2^0
+        flag_cash_received = 2  # 2^1
 
         receiption_status = 0
 
         desired_receiption_status = 0
-        desired_receiption_status |= flag_compact_portfolio
-        desired_receiption_status |= flag_cash
+        desired_receiption_status |= flag_compact_portfolio_received
+        desired_receiption_status |= flag_cash_received
 
         while receiption_status != desired_receiption_status:
             subscription_id, subscription, response = await self._tr_api.recv()
 
             if subscription["type"] == "compactPortfolio":
-                receiption_status |= flag_compact_portfolio
+                receiption_status |= flag_compact_portfolio_received
                 self._compact_portfolio = response
 
             elif subscription["type"] == "cash":
-                receiption_status |= flag_cash
+                receiption_status |= flag_cash_received
                 self._cash = response
 
             else:
