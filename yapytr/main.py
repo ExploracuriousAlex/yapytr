@@ -36,7 +36,7 @@ def create_arguments_parser():
     main_parser.add_argument(
         "-v",
         "--verbosity",
-        help="Set verbosity level (default: info)",
+        help="set verbosity level (default: info)",
         choices=["debug", "info", "warning"],
         default="info",
     )
