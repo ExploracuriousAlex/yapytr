@@ -5,6 +5,7 @@ Helper functions for yapytr.
 import json
 import logging
 import re
+import sys
 from importlib.metadata import version
 
 import coloredlogs
@@ -88,11 +89,13 @@ def get_colored_logger(name=__name__, verbosity=None):
 
 def json_preview(response, num_lines=5):
     """
-    Serialize response to a JSON formatted preview string with num_lines lines.
+    Preview JSON.
+
+    Serialize response to a JSON formatted preview string with maximum `num_lines` lines.
 
     Args:
         response: Response object. A server's response to an HTTP request.
-        num_lines: Number of lines to be shown. Defaults to 5.
+        num_lines: Maximum number of lines of the preview string. Defaults to 5.
 
     Returns:
         Preview of the JSON formatted response.
@@ -106,13 +109,13 @@ def json_preview(response, num_lines=5):
 
     if tail <= 0:
         return f"{head}\n"
-    else:
-        return f"{head}\n{tail} more lines hidden"
+
+    return f"{head}\n{tail} more lines hidden"
 
 
 def check_for_update():
     """
-    Show current program version and the latest available on the server.
+    Print current program version and the latest available on the server.
     """
 
     log = get_colored_logger(__name__)
@@ -170,7 +173,7 @@ def enhanced_input(message, pattern=None, err_msg="Pattern matching failed."):
             print()
             if quit_on_sigint:
                 print("Another Ctrl+C detected. Exiting gracefully.")
-                exit()
+                sys.exit()
 
             print("Ctrl+C detected. To quit the program press again.")
             quit_on_sigint = True

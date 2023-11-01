@@ -59,8 +59,21 @@ def create_arguments_parser():
         "account_info",
         formatter_class=lambda prog: argparse.HelpFormatter(prog, max_help_position=30),
         parents=[sub_parser_common_login_args],
-        help="show account information",
-        description="Log in to Trade Republic and show account information.",
+        help="print account information",
+        description="Log in to Trade Republic and print account information.",
+    )
+
+    parser_cancel_price_alarm = sub_parsers.add_parser(
+        "cancel_price_alarm",
+        formatter_class=lambda prog: argparse.HelpFormatter(prog, max_help_position=30),
+        parents=[sub_parser_common_login_args],
+        help="cancel price alarm",
+        description="Cancels a specific price alarm by it's id.",
+    )
+    parser_cancel_price_alarm.add_argument(
+        "alarmid",
+        help="price alarm id",
+        type=str,
     )
 
     sub_parsers.add_parser(
@@ -73,7 +86,7 @@ def create_arguments_parser():
     parser_completion = sub_parsers.add_parser(
         "completion",
         formatter_class=lambda prog: argparse.HelpFormatter(prog, max_help_position=30),
-        help="show shell completion script",
+        help="print shell completion script",
         description="Automatically generate and print shell tab completion script.",
     )
     shtab.add_argument_to(parser_completion, "shell", parent=main_parser)
@@ -82,10 +95,13 @@ def create_arguments_parser():
         "details",
         formatter_class=lambda prog: argparse.HelpFormatter(prog, max_help_position=30),
         parents=[sub_parser_common_login_args],
-        help="show details for an ISIN",
-        description="Shows details for an ISIN.",
+        help="print details for an ISIN",
+        description="Print details for an ISIN.",
     )
-    parser_details.add_argument("isin", help="ISIN of intrument")
+    parser_details.add_argument(
+        "isin",
+        help="ISIN (International Security Identification Number)",
+    )
 
     parser_dl_docs = sub_parsers.add_parser(
         "dl_docs",
@@ -157,41 +173,39 @@ def create_arguments_parser():
     )
 
     sub_parsers.add_parser(
-        "portfolio",
+        "print_price_alarms",
         formatter_class=lambda prog: argparse.HelpFormatter(prog, max_help_position=30),
         parents=[sub_parser_common_login_args],
-        help="show portfolio",
-        description="Shows the current Trade Republic portfolio.",
-    )
-
-    parser_set_price_alarms = sub_parsers.add_parser(
-        "set_price_alarms",
-        formatter_class=lambda prog: argparse.HelpFormatter(prog, max_help_position=30),
-        parents=[sub_parser_common_login_args],
-        help="set price alarms",
-        description="Set price alarms based on diff from current price.",
-    )
-    parser_set_price_alarms.add_argument(
-        "-%",
-        "--percent",
-        help="Percentage +/-",
-        metavar="[-1000 ... 1000]",
-        type=int,
-        default=-10,
-    )
-
-    sub_parsers.add_parser(
-        "show_price_alarms",
-        formatter_class=lambda prog: argparse.HelpFormatter(prog, max_help_position=30),
-        parents=[sub_parser_common_login_args],
-        help="show price alarms",
+        help="print price alarms",
         description="Print overview of set price alarms.",
     )
 
     sub_parsers.add_parser(
+        "portfolio",
+        formatter_class=lambda prog: argparse.HelpFormatter(prog, max_help_position=30),
+        parents=[sub_parser_common_login_args],
+        help="print portfolio",
+        description="Print the current Trade Republic portfolio.",
+    )
+
+    parser_set_price_alarm = sub_parsers.add_parser(
+        "set_price_alarm",
+        formatter_class=lambda prog: argparse.HelpFormatter(prog, max_help_position=30),
+        parents=[sub_parser_common_login_args],
+        help="set price alarm",
+        description="Sets an alert for a specific ISIN at a specific price",
+    )
+    parser_set_price_alarm.add_argument(
+        "isin",
+        help="ISIN (International Security Identification Number)",
+        type=str,
+    )
+    parser_set_price_alarm.add_argument("price", help="target price", type=float)
+
+    sub_parsers.add_parser(
         "version",
-        help="show yapytr version",
-        description="Shows the current version of yapytr.",
+        help="print yapytr version",
+        description="Print the current version of yapytr.",
     )
 
     return main_parser
@@ -223,10 +237,15 @@ def main():
         asyncio.get_event_loop().run_until_complete(dl.dl_loop())
     elif args.command == "account_info":
         print_information(login(phone_no=args.phone_no, pin=args.pin))
-    elif args.command == "set_price_alarms":
-        # TODO: implement set_price_alarms
-        log.warning("Not implemented yet")
-    elif args.command == "show_price_alarms":
+    elif args.command == "set_price_alarm":
+        tro = login(phone_no=args.phone_no, pin=args.pin)
+        alarms = Alarms(tro)
+        alarms.set_alarm(args.isin, args.price)
+    elif args.command == "cancel_price_alarm":
+        tro = login(phone_no=args.phone_no, pin=args.pin)
+        alarms = Alarms(tro)
+        alarms.cancel_alarm(args.alarmid)
+    elif args.command == "print_price_alarms":
         tro = login(phone_no=args.phone_no, pin=args.pin)
         alarms = Alarms(tro)
         alarms.get_alarms()

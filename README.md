@@ -24,28 +24,30 @@ pip install .
 
 ```
 $ yapytr help
-usage: yapytr [-h] [-v {debug,info,warning}] {login,dl_docs,portfolio,details,version,get_price_alarms,set_price_alarms,export_transactions,completion,clean} ...
+usage: yapytr [-h] [-v {debug,info,warning}]
+                   {account_info,cancel_price_alarm,clean,completion,details,dl_docs,export_transactions,login,print_price_alarms,portfolio,set_price_alarm,version} ...
 
 This program provides an alternative access to Trade Republic via the console.
 
 options:
   -h, --help                  show this help message and exit
   -v {debug,info,warning}, --verbosity {debug,info,warning}
-                              Set verbosity level (default: info)
+                              set verbosity level (default: info)
 
 commands:
-  {account_info,clean,completion,details,dl_docs,export_transactions,login,portfolio,set_price_alarms,show_price_alarms,version}
-    account_info              show account information
+  {account_info,cancel_price_alarm,clean,completion,details,dl_docs,export_transactions,login,print_price_alarms,portfolio,set_price_alarm,version}
+    account_info              print account information
+    cancel_price_alarm        cancel price alarm
     clean                     clean yapytr settings
-    completion                show shell completion script
-    details                   show details for an ISIN
+    completion                print shell completion script
+    details                   print details for an ISIN
     dl_docs                   download documents
     export_transactions       export transactions for Portfolio Performance
     login                     login to Trade Republic
-    portfolio                 show portfolio
-    set_price_alarms          set price alarms
-    show_price_alarms         show price alarms
-    version                   show yapytr version
+    print_price_alarms        print price alarms
+    portfolio                 print portfolio
+    set_price_alarm           set price alarm
+    version                   print yapytr version
 ```
 
 ## Authentication

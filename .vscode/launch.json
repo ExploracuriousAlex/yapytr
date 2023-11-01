@@ -2,6 +2,16 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "_pytr: yapytr -v debug",
+      "type": "python",
+      "request": "launch",
+      "module": "yapytr",
+      "args": [
+        "-v",
+        "debug"
+      ]
+    },
+    {
       "name": "_yapytr: yapytr",
       "type": "python",
       "request": "launch",
@@ -15,16 +25,6 @@
       "module": "yapytr",
       "args": [
         "-h"
-      ]
-    },
-    {
-      "name": "_pytr: yapytr -v debug",
-      "type": "python",
-      "request": "launch",
-      "module": "yapytr",
-      "args": [
-        "-v",
-        "debug"
       ]
     },
     {
@@ -55,6 +55,28 @@
       "module": "yapytr",
       "args": [
         "account_info",
+        "-h"
+      ]
+    },
+    {
+      "name": "cancel_price_alarm: yapytr -v debug cancel_price_alarm [enter real id first!]",
+      "type": "python",
+      "request": "launch",
+      "module": "yapytr",
+      "args": [
+        "-v",
+        "debug",
+        "cancel_price_alarm",
+        "[ENTER ID first!]"
+      ]
+    },
+    {
+      "name": "cancel_price_alarm: yapytr cancel_price_alarm -h",
+      "type": "python",
+      "request": "launch",
+      "module": "yapytr",
+      "args": [
+        "cancel_price_alarm",
         "-h"
       ]
     },
@@ -252,44 +274,57 @@
       ]
     },
     {
-      "name": "set_price_alarms: yapytr -v debug set_price_alarms",
+      "name": "print_price_alarms: yapytr -v debug print_price_alarms",
       "type": "python",
       "request": "launch",
       "module": "yapytr",
       "args": [
         "-v",
         "debug",
-        "set_price_alarms"
+        "print_price_alarms"
       ]
     },
     {
-      "name": "set_price_alarms: yapytr set_price_alarms -h",
+      "name": "print_price_alarms: yapytr print_price_alarms -h",
       "type": "python",
       "request": "launch",
       "module": "yapytr",
       "args": [
-        "set_price_alarms",
+        "print_price_alarms",
         "-h"
       ]
     },
     {
-      "name": "show_price_alarms: yapytr -v debug show_price_alarms",
+      "name": "set_price_alarm: yapytr -v debug set_price_alarm",
       "type": "python",
       "request": "launch",
       "module": "yapytr",
       "args": [
         "-v",
         "debug",
-        "show_price_alarms"
+        "set_price_alarm"
       ]
     },
     {
-      "name": "show_price_alarms: yapytr show_price_alarms -h",
+      "name": "set_price_alarm: yapytr -v debug set_price_alarm US0378331005 100.54",
       "type": "python",
       "request": "launch",
       "module": "yapytr",
       "args": [
-        "show_price_alarms",
+        "-v",
+        "debug",
+        "set_price_alarm",
+        "US0378331005",
+        "100.54"
+      ]
+    },
+    {
+      "name": "set_price_alarm: yapytr set_price_alarm -h",
+      "type": "python",
+      "request": "launch",
+      "module": "yapytr",
+      "args": [
+        "set_price_alarm",
         "-h"
       ]
     },
