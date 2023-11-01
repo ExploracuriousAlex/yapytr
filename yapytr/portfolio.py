@@ -27,7 +27,7 @@ class Portfolio:
 
         Subscribe to compactPortfolio and cash information from Trade Republic websocket.
         Save it in the `Portfolio` object upon receipt and unsubscribe.
-        Also subscribe to ticker andd instrument information from Trade Republic websocket for positions in the portfolio to receive name and last price (from LSX).
+        Also subscribe to ticker and instrument information from Trade Republic websocket for positions in the portfolio to receive name and last price (from LSX).
         """
 
         await self._tr_api.compact_portfolio()
