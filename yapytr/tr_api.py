@@ -300,9 +300,18 @@ class TradeRepublicApi:
             return str(subscription_id)
 
     async def subscribe(self, payload):
+        """
+        Subscribe to specific data streams offered by the Trade Republic websocket.
+
+        Args:
+            payload: Payload to tell the Trade Republic websocket which data streams to send.
+
+        Returns:
+            The subscription id.
+        """
         subscription_id = await self._next_subscription_id()
         ws = await self._get_ws()
-        self.log.debug(f"Subscribing: 'sub {subscription_id} {json.dumps(payload)}'")
+        self.log.debug("Subscribing: 'sub %s %s'", subscription_id, json.dumps(payload))
         self.subscriptions[subscription_id] = payload
 
         payload_with_token = payload.copy()
