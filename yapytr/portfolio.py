@@ -1,5 +1,5 @@
 """
-Module providing the Portfolio class for checking the Trade Republic portfolio.
+A Portfolio class.
 """
 import asyncio
 from .utils import json_preview, get_colored_logger
@@ -7,30 +7,37 @@ from .utils import json_preview, get_colored_logger
 
 class Portfolio:
     """
-    Class for checking the Trade Republic portfolio.
+    Class to receive and print the Trade Republic portfolio.
     """
 
     def __init__(self, tr_api):
+        """Initializes the instance.
+
+        Args:
+          tr_api: The `TradeRepublicApi` object to be used to interact with Trade Republic.
+        """
         self.log = get_colored_logger(__name__)
         self.tr_api = tr_api
         self.compact_portfolio = None
         self.cash = None
 
-    async def portfolio_loop(self):
+    async def _portfolio_loop(self):
         """
-        Requests portfolio and cash information from Trade Republic websocket and
-        saves them upon receipt.
+        Receive portfolio.
+
+        Subscribe to compactPortfolio and cash information from Trade Republic websocket.
+        Save it in the `Portfolio` object upon receipt and unsubscribe.
+        Also subscribe to ticker andd instrument information from Trade Republic websocket for positions in the portfolio to receive name and last price (from LSX).
         """
 
         await self.tr_api.compact_portfolio()
-
         await self.tr_api.cash()
 
-        # await self.tr_api.available_cash_for_payout()
-
-        receiption_status = 0
+        # define flags to control the loop
         flag_compact_portfolio = 1  # 2^0
         flag_cash = 2  # 2^1
+
+        receiption_status = 0
 
         desired_receiption_status = 0
         desired_receiption_status |= flag_compact_portfolio
@@ -46,10 +53,6 @@ class Portfolio:
             elif subscription["type"] == "cash":
                 receiption_status |= flag_cash
                 self.cash = response
-
-            # elif subscription['type'] == 'availableCashForPayout':
-            #     recv += 1
-            #     self.payoutCash = response
 
             else:
                 self.log.debug(
@@ -115,6 +118,8 @@ class Portfolio:
     def print_portfolio(self):
         """
         Print the portfolio.
+
+        Print portfolio and cash information to the standard output stream.
         """
 
         # self.log.debug(self.compact_portfolio)
@@ -172,12 +177,10 @@ class Portfolio:
         print(f"Cash {currency} {cash:>40.2f} -> {cash:>10.2f}")
         print(f"Total {cash+total_buy_cost:>43.2f} -> {cash+total_net_value:>10.2f}")
 
-    def get(self):
+    def get_portfolio(self):
         """
-        Executes the query of portfolio and cash information asynchronously until it is finished.
+        Execute the data receiving loop to receive the portfolio.
 
-        Triggers the data to be output when ready.
+        The received data can be printed with `print_portfolio` method.
         """
-        asyncio.get_event_loop().run_until_complete(self.portfolio_loop())
-
-        self.print_portfolio()
+        asyncio.get_event_loop().run_until_complete(self._portfolio_loop())

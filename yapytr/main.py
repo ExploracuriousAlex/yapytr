@@ -234,7 +234,10 @@ def main():
             args.isin,
         ).get()
     elif args.command == "portfolio":
-        Portfolio(login(phone_no=args.phone_no, pin=args.pin)).get()
+        tro = login(phone_no=args.phone_no, pin=args.pin)
+        portfolio = Portfolio(tro)
+        portfolio.get_portfolio()
+        portfolio.print_portfolio()
     elif args.command == "export_transactions":
         export_transactions(args.input, args.output, args.lang)
     elif args.command == "version":
