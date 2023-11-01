@@ -16,10 +16,10 @@ class Portfolio:
         Args:
           tr_api: The `TradeRepublicApi` object to be used to interact with Trade Republic.
         """
-        self.log = get_colored_logger(__name__)
-        self.tr_api = tr_api
-        self.compact_portfolio = None
-        self.cash = None
+        self._log = get_colored_logger(__name__)
+        self._tr_api = tr_api
+        self._compact_portfolio = None
+        self._cash = None
 
     async def _portfolio_loop(self):
         """
@@ -30,8 +30,8 @@ class Portfolio:
         Also subscribe to ticker andd instrument information from Trade Republic websocket for positions in the portfolio to receive name and last price (from LSX).
         """
 
-        await self.tr_api.compact_portfolio()
-        await self.tr_api.cash()
+        await self._tr_api.compact_portfolio()
+        await self._tr_api.cash()
 
         # define flags to control the loop
         flag_compact_portfolio = 1  # 2^0
@@ -44,48 +44,48 @@ class Portfolio:
         desired_receiption_status |= flag_cash
 
         while receiption_status != desired_receiption_status:
-            subscription_id, subscription, response = await self.tr_api.recv()
+            subscription_id, subscription, response = await self._tr_api.recv()
 
             if subscription["type"] == "compactPortfolio":
                 receiption_status |= flag_compact_portfolio
-                self.compact_portfolio = response
+                self._compact_portfolio = response
 
             elif subscription["type"] == "cash":
                 receiption_status |= flag_cash
-                self.cash = response
+                self._cash = response
 
             else:
-                self.log.debug(
+                self._log.debug(
                     "unmatched subscription of type '%s':\n%s",
                     subscription["type"],
                     json_preview(response),
                 )
 
-            await self.tr_api.unsubscribe(subscription_id)
+            await self._tr_api.unsubscribe(subscription_id)
 
         # Populate netValue for each ISIN
-        positions = self.compact_portfolio["positions"]
+        positions = self._compact_portfolio["positions"]
         subscriptions = {}
         for (
             pos
         ) in positions:  # sorted(positions, key=lambda x: x["netSize"], reverse=True):
             isin = pos["instrumentId"]
             # subscription_id = await self.tr.instrument_details(pos['instrumentId'])
-            subscription_id = await self.tr_api.ticker(isin, exchange="LSX")
+            subscription_id = await self._tr_api.ticker(isin, exchange="LSX")
             subscriptions[subscription_id] = pos
 
         while len(subscriptions) > 0:
-            subscription_id, subscription, response = await self.tr_api.recv()
+            subscription_id, subscription, response = await self._tr_api.recv()
 
             if subscription["type"] == "ticker":
-                await self.tr_api.unsubscribe(subscription_id)
+                await self._tr_api.unsubscribe(subscription_id)
                 pos = subscriptions[subscription_id]
                 subscriptions.pop(subscription_id, None)
                 pos["netValue"] = float(response["last"]["price"]) * float(
                     pos["netSize"]
                 )
             else:
-                self.log.debug(
+                self._log.debug(
                     "unmatched subscription of type '%s':\n%s",
                     subscription["type"],
                     json_preview(response),
@@ -97,19 +97,19 @@ class Portfolio:
             pos
         ) in positions:  # sorted(positions, key=lambda x: x["netSize"], reverse=True):
             isin = pos["instrumentId"]
-            subscription_id = await self.tr_api.instrument_details(pos["instrumentId"])
+            subscription_id = await self._tr_api.instrument_details(pos["instrumentId"])
             subscriptions[subscription_id] = pos
 
         while len(subscriptions) > 0:
-            subscription_id, subscription, response = await self.tr_api.recv()
+            subscription_id, subscription, response = await self._tr_api.recv()
 
             if subscription["type"] == "instrument":
-                await self.tr_api.unsubscribe(subscription_id)
+                await self._tr_api.unsubscribe(subscription_id)
                 pos = subscriptions[subscription_id]
                 subscriptions.pop(subscription_id, None)
                 pos["name"] = response["shortName"]
             else:
-                self.log.debug(
+                self._log.debug(
                     "unmatched subscription of type '%s':\n%s",
                     subscription["type"],
                     json_preview(response),
@@ -134,7 +134,7 @@ class Portfolio:
         )
         total_buy_cost = 0.0
         total_net_value = 0.0
-        positions = self.compact_portfolio["positions"]
+        positions = self._compact_portfolio["positions"]
         for pos in sorted(positions, key=lambda x: float(x["netSize"]), reverse=True):
             buy_cost = float(pos["averageBuyIn"]) * float(pos["netSize"])
             diff = float(pos["netValue"]) - buy_cost
@@ -172,8 +172,8 @@ class Portfolio:
             + f"{diff:>10.2f} {diff_in_percent:>7.1f}%"
         )
 
-        cash = float(self.cash[0]["amount"])
-        currency = self.cash[0]["currencyId"]
+        cash = float(self._cash[0]["amount"])
+        currency = self._cash[0]["currencyId"]
         print(f"Cash {currency} {cash:>40.2f} -> {cash:>10.2f}")
         print(f"Total {cash+total_buy_cost:>43.2f} -> {cash+total_net_value:>10.2f}")
 
