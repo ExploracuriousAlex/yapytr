@@ -236,9 +236,9 @@ class DocDownload:
 
             filepath_with_doc_id = directory / doc_type / f"{filename_with_doc_id}.pdf"
 
-        filepath = sanitize_filepath(filepath, "_", "auto")
+        filepath = sanitize_filepath(filepath, "_", "universal")
 
-        filepath_with_doc_id = sanitize_filepath(filepath_with_doc_id, "_", "auto")
+        filepath_with_doc_id = sanitize_filepath(filepath_with_doc_id, "_", "universal")
 
         download_job = {
             "doc_url": doc_url,
