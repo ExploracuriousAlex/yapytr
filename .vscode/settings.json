@@ -6,6 +6,5 @@
     },
     "autoDocstring.docstringFormat": "google-notypes",
     "autoDocstring.includeExtendedSummary": true,
-    "autoDocstring.startOnNewLine": true,
-    "pylint.importStrategy": "fromEnvironment"
+    "autoDocstring.startOnNewLine": true
 }

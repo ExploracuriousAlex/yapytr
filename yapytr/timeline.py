@@ -1,12 +1,10 @@
 """
 A Timeline class.
 """
-
-
 import json
 from datetime import datetime
 
-from .utils import get_colored_logger, export_transactions
+from .utils import get_colored_logger
 
 
 class Timeline:
@@ -19,10 +17,11 @@ class Timeline:
     """
 
     def __init__(self, tr_api):
-        """Initializes the instance.
+        """
+        Initializes the instance.
 
         Args:
-          tr_api: The `TradeRepublicApi` object to be used to interact with Trade Republic.
+            tr_api: The `TradeRepublicApi` object to be used to interact with Trade Republic.
         """
         self._log = get_colored_logger(__name__)
         self._tr_api = tr_api
@@ -34,8 +33,8 @@ class Timeline:
         self.received_detail = 0
 
         self._timeline_events = []
-        self._timeline_events_with_docs = []
-        self._timeline_events_without_docs = []
+        self.timeline_events_with_docs = []
+        self.timeline_events_without_docs = []
 
         self._processed_doc_ids = []
 
@@ -136,10 +135,10 @@ class Timeline:
                 msg += f"Skip: payload unmatched ({action['payload']})"
 
             if msg == "":
-                self._timeline_events_with_docs.append(timeline_event)
+                self.timeline_events_with_docs.append(timeline_event)
 
             else:
-                self._timeline_events_without_docs.append(timeline_event)
+                self.timeline_events_without_docs.append(timeline_event)
 
                 self._log.debug(
                     "%s %s: %s %s",
@@ -241,7 +240,7 @@ class Timeline:
                         # save all savingsplan documents in a subdirectory
 
                         if is_savings_plan:
-                            dl.update_download_list(
+                            dl.add_to_download_queue(
                                 doc,
                                 response["titleText"],
                                 response["subtitleText"],
@@ -255,41 +254,21 @@ class Timeline:
                             if response["titleText"] == "Wertpapierübertrag":
                                 body = next(
                                     item["data"]["body"]
-                                    for item in self._timeline_events_with_docs
+                                    for item in self.timeline_events_with_docs
                                     if item["data"]["id"] == response["id"]
                                 )
 
-                                dl.update_download_list(
+                                dl.add_to_download_queue(
                                     doc,
                                     response["titleText"] + " - " + body,
                                     response["subtitleText"],
                                 )
 
                             else:
-                                dl.update_download_list(
+                                dl.add_to_download_queue(
                                     doc, response["titleText"], response["subtitleText"]
                                 )
 
         if self.received_detail == self._num_timeline_details:
             self._log.info("All timeline details have been received.")
-
-            dl.output_path.mkdir(parents=True, exist_ok=True)
-
-            with open(dl.output_path / "other_events.json", "w", encoding="utf-8") as f:
-                json.dump(
-                    self._timeline_events_without_docs, f, ensure_ascii=False, indent=2
-                )
-
-            with open(
-                dl.output_path / "events_with_documents.json", "w", encoding="utf-8"
-            ) as f:
-                json.dump(
-                    self._timeline_events_with_docs, f, ensure_ascii=False, indent=2
-                )
-
-            export_transactions(
-                dl.output_path / "other_events.json",
-                dl.output_path / "account_transactions.csv",
-            )
-
-            dl.dl_docs()
+            dl.all_timeline_details_received = True

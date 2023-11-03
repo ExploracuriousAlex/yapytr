@@ -11,10 +11,11 @@ class Portfolio:
     """
 
     def __init__(self, tr_api):
-        """Initializes the instance.
+        """
+        Initializes the instance.
 
         Args:
-          tr_api: The `TradeRepublicApi` object to be used to interact with Trade Republic.
+            tr_api: The `TradeRepublicApi` object to be used to interact with Trade Republic.
         """
         self._log = get_colored_logger(__name__)
         self._tr_api = tr_api
@@ -56,7 +57,7 @@ class Portfolio:
 
             else:
                 self._log.debug(
-                    "unmatched subscription of type '%s':\n%s",
+                    "Unmatched subscription of type '%s':\n%s",
                     subscription["type"],
                     json_preview(response),
                 )
@@ -86,7 +87,7 @@ class Portfolio:
                 )
             else:
                 self._log.debug(
-                    "unmatched subscription of type '%s':\n%s",
+                    "Unmatched subscription of type '%s':\n%s",
                     subscription["type"],
                     json_preview(response),
                 )
@@ -110,7 +111,7 @@ class Portfolio:
                 pos["name"] = response["shortName"]
             else:
                 self._log.debug(
-                    "unmatched subscription of type '%s':\n%s",
+                    "Unmatched subscription of type '%s':\n%s",
                     subscription["type"],
                     json_preview(response),
                 )

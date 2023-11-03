@@ -1,10 +1,9 @@
 """
-Yapytr main module. Takes care of user interaction and flow control of the program.
+Yapytr main module.
 """
 
 #!/usr/bin/env python
 import argparse
-import asyncio
 import time
 from pathlib import Path
 
@@ -15,7 +14,7 @@ from .alarms import Alarms
 from .details import Details
 from .doc_download import DocDownload
 from .portfolio import Portfolio
-from .timeline import export_transactions
+from .utils import export_transactions
 from .utils import check_for_update, get_colored_logger
 
 
@@ -214,6 +213,8 @@ def create_arguments_parser():
 def main():
     """
     Yapytr main() function.
+
+    Take care of user interaction and flow control of the program.
     """
     parser = create_arguments_parser()
     args = parser.parse_args()
@@ -234,30 +235,30 @@ def main():
             since_timestamp=since_timestamp,
             max_workers=args.workers,
         )
-        asyncio.get_event_loop().run_until_complete(dl.dl_loop())
+        dl.download()
     elif args.command == "account_info":
         print_information(login(phone_no=args.phone_no, pin=args.pin))
     elif args.command == "set_price_alarm":
-        tro = login(phone_no=args.phone_no, pin=args.pin)
-        alarms = Alarms(tro)
+        tra = login(phone_no=args.phone_no, pin=args.pin)
+        alarms = Alarms(tra)
         alarms.set_alarm(args.isin, args.price)
     elif args.command == "cancel_price_alarm":
-        tro = login(phone_no=args.phone_no, pin=args.pin)
-        alarms = Alarms(tro)
+        tra = login(phone_no=args.phone_no, pin=args.pin)
+        alarms = Alarms(tra)
         alarms.cancel_alarm(args.alarmid)
     elif args.command == "print_price_alarms":
-        tro = login(phone_no=args.phone_no, pin=args.pin)
-        alarms = Alarms(tro)
+        tra = login(phone_no=args.phone_no, pin=args.pin)
+        alarms = Alarms(tra)
         alarms.get_alarms()
         alarms.print_alarms()
     elif args.command == "details":
-        Details(
-            login(phone_no=args.phone_no, pin=args.pin),
-            args.isin,
-        ).get()
+        tra = login(phone_no=args.phone_no, pin=args.pin)
+        details = Details(tra)
+        details.get_details(args.isin)
+        details.print_details()
     elif args.command == "portfolio":
-        tro = login(phone_no=args.phone_no, pin=args.pin)
-        portfolio = Portfolio(tro)
+        tra = login(phone_no=args.phone_no, pin=args.pin)
+        portfolio = Portfolio(tra)
         portfolio.get_portfolio()
         portfolio.print_portfolio()
     elif args.command == "export_transactions":

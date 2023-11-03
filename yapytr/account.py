@@ -99,7 +99,7 @@ def login(phone_no=None, pin=None):
             countdown = tr_api.inititate_weblogin()
         except ValueError as e:
             log.fatal(str(e))
-            exit(1)
+            sys.exit(1)
         request_time = time.time()
         print("Enter the code you received to your mobile app as a notification.")
         print(

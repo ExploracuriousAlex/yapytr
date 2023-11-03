@@ -14,10 +14,11 @@ class Alarms:
     """
 
     def __init__(self, tr_api):
-        """Initializes the instance.
+        """
+        Initializes the instance.
 
         Args:
-          tr_api: The `TradeRepublicApi` object to be used to interact with Trade Republic.
+            tr_api: The `TradeRepublicApi` object to be used to interact with Trade Republic.
         """
         self._log = get_colored_logger(__name__)
         self._tr_api = tr_api
@@ -104,7 +105,7 @@ class Alarms:
             self._log.warning("Could not set price alarm for instrument '%s'.", isin)
             self._log.warning("Server answer was:\n%s", create_price_alarm_answer)
 
-    async def _cancel_alarm_loop(self, id):
+    async def _cancel_alarm_loop(self, alarm_id):
         """
         Cancel price alarm.
 
@@ -112,10 +113,10 @@ class Alarms:
         Process the answer and print the result.
 
         Args:
-            id: The price alarm id. Get it with `get_alarms` + `print_alarms`.
+            alarm_id: The price alarm id. Get it with `get_alarms` + `print_alarms`.
         """
 
-        await self._tr_api.cancel_price_alarm(id)
+        await self._tr_api.cancel_price_alarm(alarm_id)
 
         # define flags to control the loop
         flag_cancel_price_alarm_received = 1  # 2^0
@@ -145,9 +146,9 @@ class Alarms:
         # self._log.debug(json_preview(cancel_price_alarm_answer))
 
         if cancel_price_alarm_answer["status"] == "succeeded":
-            print(f"Successfully canceled price alarm '{id}'.")
+            print(f"Successfully canceled price alarm '{alarm_id}'.")
         else:
-            self._log.warning("Could not cancel price alarm '%s'.", id)
+            self._log.warning("Could not cancel price alarm '%s'.", alarm_id)
             self._log.warning("Server answer was:\n%s", cancel_price_alarm_answer)
 
     def print_alarms(self):
@@ -216,15 +217,17 @@ class Alarms:
             self._log.error("Could not set price alarm for instrument '%s'.", isin)
             self._log.error("Server answer was:\n%s", e.error)
 
-    def cancel_alarm(self, id):
+    def cancel_alarm(self, alarm_id):
         """
         Execute the loop to cancel a price alarm and receive confirmation.
 
         Args:
-            id: The price alarm id. Get it with `get_alarms` + `print_alarms`.
+            alarm_id: The price alarm id. Get it with `get_alarms` + `print_alarms`.
         """
         try:
-            asyncio.get_event_loop().run_until_complete(self._cancel_alarm_loop(id))
+            asyncio.get_event_loop().run_until_complete(
+                self._cancel_alarm_loop(alarm_id)
+            )
         except TradeRepublicError as e:
-            self._log.error("Could not cancel price alarm '%s'.", id)
+            self._log.error("Could not cancel price alarm '%s'.", alarm_id)
             self._log.error("Server answer was:\n%s", e.error)
