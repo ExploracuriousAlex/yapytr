@@ -1,4 +1,4 @@
-# yapytr: Yet another **Py**thon **T**rade **R**epublic program to use Trade Republic via the console
+# yapytr: **Y**et **A**nother **Py**thon **T**rade **R**epublic program to use Trade Republic via the console
 
 This program provides an alternative access to Trade Republic via the console.
 It bases on [pytr](https://github.com/marzzzello/pytr) from marzzzello.
