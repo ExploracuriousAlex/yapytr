@@ -1,54 +1,51 @@
 """
-
-
-Module with functions to retrieve timeline and timeline detail information from Trade Republic.
+A Timeline class.
 """
 
 
 import json
 from datetime import datetime
 
-
-from locale import getlocale
-
-
-from .utils import get_colored_logger
+from .utils import get_colored_logger, export_transactions
 
 
 class Timeline:
     """
-    Class containing functions to retrieve timeline and
-    timeline detail information from Trade Republic.
+    Class to receive timeline information from Trade Republic.
 
-    Stores timeline events for further processing.
+
+    Receive timeline information from Trade Republic.
+    Receive time line details and export data or download documents accordingly.
     """
 
     def __init__(self, tr_api):
-        self.tr_api = tr_api
+        """Initializes the instance.
 
-        self.log = get_colored_logger(__name__)
+        Args:
+          tr_api: The `TradeRepublicApi` object to be used to interact with Trade Republic.
+        """
+        self._log = get_colored_logger(__name__)
+        self._tr_api = tr_api
 
-        self.num_timelines = 0
+        self._num_timelines = 0
+        self._num_timeline_details = 0
 
-        self.num_timeline_details = 0
-
+        self._requested_detail = 0
         self.received_detail = 0
 
-        self.requested_detail = 0
+        self._timeline_events = []
+        self._timeline_events_with_docs = []
+        self._timeline_events_without_docs = []
 
-        self.timeline_events = []
-
-        self.events_with_docs = []
-
-        self.events_without_docs = []
-
-        self.processed_doc_ids = []
+        self._processed_doc_ids = []
 
     async def get_timeline(self, response=None, max_age_timestamp=0):
         """
-        Retrieves a part of the Trade Republic timeline.
+        Receive timeline.
 
-        Also requests the next timeline part and triggers processing the timeline events.
+        Subscribe to timline information from Trade Republic websocket.
+        When receiving timeline information, get timeline details contained.
+        If present subscribe to the next part of the timeline.
 
         Args:
             response: The response of the server with the previous timeline. Defaults to None.
@@ -58,33 +55,33 @@ class Timeline:
         if response is None:
             # empty response / first timeline
 
-            self.log.info("Awaiting timeline part 1.")
-            await self.tr_api.timeline()
+            self._log.info("Awaiting timeline part 1.")
+            await self._tr_api.timeline()
 
         else:
             timestamp = response["data"][-1]["data"]["timestamp"]
 
-            self.num_timelines += 1
-            self.num_timeline_details += len(response["data"])
+            self._num_timelines += 1
+            self._num_timeline_details += len(response["data"])
 
-            for event in response["data"]:
-                self.timeline_events.append(event)
+            for timeline_event in response["data"]:
+                self._timeline_events.append(timeline_event)
 
             after = response["cursors"].get("after")
 
             if after is None:
                 # last timeline is reached
 
-                self.log.info(
-                    "Received timeline part %s (last part).", self.num_timelines
+                self._log.info(
+                    "Received timeline part %s (last part).", self._num_timelines
                 )
 
                 await self._get_timeline_details(5)
 
             elif max_age_timestamp != 0 and timestamp < max_age_timestamp:
-                self.log.info("Received timeline part %s.", self.num_timelines + 1)
+                self._log.info("Received timeline part %s.", self._num_timelines + 1)
 
-                self.log.info(
+                self._log.info(
                     "Reached last relevant timeline part "
                     + "according to your --last_days configuration."
                 )
@@ -92,17 +89,20 @@ class Timeline:
                 await self._get_timeline_details(5, max_age_timestamp=max_age_timestamp)
 
             else:
-                self.log.info(
+                self._log.info(
                     "Received timeline part %s, awaiting timeline part %s.",
-                    self.num_timelines,
-                    self.num_timelines + 1,
+                    self._num_timelines,
+                    self._num_timelines + 1,
                 )
 
-                await self.tr_api.timeline(after)
+                await self._tr_api.timeline(after)
 
     async def _get_timeline_details(self, num_torequest, max_age_timestamp=0):
         """
-        Initiates the query of timeline details for defined number of timeline events.
+        Receive timeline details.
+
+        Subscribe to a defined number of timlineDetail information from Trade Republic websocket.
+        Save it in the `Timeline` object upon receipt.
 
         Args:
             num_torequest: Number of timline events to be processed to retrieve timeline details.
@@ -110,93 +110,72 @@ class Timeline:
         """
 
         while num_torequest > 0:
-            if len(self.timeline_events) == 0:
-                self.log.info("All timeline details requested")
+            if len(self._timeline_events) == 0:
+                self._log.info("All timeline details requested")
                 return
 
-            else:
-                event = self.timeline_events.pop()
-
-            action = event["data"].get("action")
-
-            # icon = event['data'].get('icon')
+            timeline_event = self._timeline_events.pop()
+            action = timeline_event["data"].get("action")
 
             msg = ""
 
             if (
                 max_age_timestamp != 0
-                and event["data"]["timestamp"] > max_age_timestamp
+                and timeline_event["data"]["timestamp"] > max_age_timestamp
             ):
                 msg += "Skip: too old"
 
-            # elif icon is None:
-
-            #     pass
-
-            # elif icon.endswith('/human.png'):
-
-            #     msg += 'Skip: human'
-
-            # elif icon.endswith('/CashIn.png'):
-
-            #     msg += 'Skip: CashIn'
-
-            # elif icon.endswith('/ExemptionOrderChanged.png'):
-
-            #     msg += 'Skip: ExemptionOrderChanged'
-
             elif action is None:
-                if event["data"].get("actionLabel") is None:
+                if timeline_event["data"].get("actionLabel") is None:
                     msg += "Skip: no action"
 
             elif action.get("type") != "timelineDetail":
                 msg += f"Skip: action type unmatched ({action['type']})"
 
-            elif action.get("payload") != event["data"]["id"]:
+            elif action.get("payload") != timeline_event["data"]["id"]:
                 msg += f"Skip: payload unmatched ({action['payload']})"
 
             if msg == "":
-                self.events_with_docs.append(event)
+                self._timeline_events_with_docs.append(timeline_event)
 
             else:
-                self.events_without_docs.append(event)
+                self._timeline_events_without_docs.append(timeline_event)
 
-                self.log.debug(
+                self._log.debug(
                     "%s %s: %s %s",
                     msg,
-                    event["data"]["title"],
-                    event["data"].get("body"),
-                    json.dumps(event),
+                    timeline_event["data"]["title"],
+                    timeline_event["data"].get("body"),
+                    json.dumps(timeline_event),
                 )
 
-                self.num_timeline_details -= 1
+                self._num_timeline_details -= 1
                 continue
 
             num_torequest -= 1
 
-            self.requested_detail += 1
+            self._requested_detail += 1
 
-            await self.tr_api.timeline_detail(event["data"]["id"])
+            await self._tr_api.timeline_detail(timeline_event["data"]["id"])
 
     async def process_timeline_detail(self, response, dl, max_age_timestamp=0):
         """
-        Processes timeline details for extraction and export of data.
+        Process timeline details for extraction and export of data.
 
         Args:
             response: Received time line detail from Trade Republic websocket.
-            dl: The DL object that takes care of document downloads.
+            dl: The DocDownload object that takes care of document downloads.
             max_age_timestamp: Maximum age for data to be fetched. Defaults to 0.
         """
 
         self.received_detail += 1
 
-        self.log.debug("Received Timeline Detail %s.", self.received_detail)
+        self._log.debug("Received Timeline Detail %s.", self.received_detail)
 
         # when all requested timeline events are received request 5 new
 
-        if self.received_detail == self.requested_detail:
-            remaining = len(self.timeline_events)
-
+        if self.received_detail == self._requested_detail:
+            remaining = len(self._timeline_events)
             if remaining < 5:
                 await self._get_timeline_details(remaining)
 
@@ -224,32 +203,30 @@ class Timeline:
                             "deleteSavingsPlan",
                         ]:
                             is_savings_plan = True
-
                             break
 
         if response["subtitleText"] != "Sparplan" and is_savings_plan is True:
             savings_plan_fmt = " -- SPARPLAN"
-
         else:
             savings_plan_fmt = ""
 
-        max_details_digits = len(str(self.num_timeline_details))
+        max_details_digits = len(str(self._num_timeline_details))
 
-        self.log.info(
-            f"{self.received_detail:>{max_details_digits}}/{self.num_timeline_details}: "
+        self._log.info(
+            f"{self.received_detail:>{max_details_digits}}/{self._num_timeline_details}: "
             + f"{response['titleText']} -- {response['subtitleText']}{savings_plan_fmt}"
         )
 
         for section in response["sections"]:
             if section["type"] == "documents":
                 for doc in section["documents"]:
-                    if doc["id"] in self.processed_doc_ids:
-                        self.log.debug(
+                    if doc["id"] in self._processed_doc_ids:
+                        self._log.debug(
                             "Document with id '%s' was already processed. Skipping..."
                         )
                         continue
 
-                    self.processed_doc_ids.append(doc["id"])
+                    self._processed_doc_ids.append(doc["id"])
 
                     try:
                         timestamp = (
@@ -278,7 +255,7 @@ class Timeline:
                             if response["titleText"] == "Wertpapierübertrag":
                                 body = next(
                                     item["data"]["body"]
-                                    for item in self.events_with_docs
+                                    for item in self._timeline_events_with_docs
                                     if item["data"]["id"] == response["id"]
                                 )
 
@@ -293,18 +270,22 @@ class Timeline:
                                     doc, response["titleText"], response["subtitleText"]
                                 )
 
-        if self.received_detail == self.num_timeline_details:
-            self.log.info("All timeline details have been received.")
+        if self.received_detail == self._num_timeline_details:
+            self._log.info("All timeline details have been received.")
 
             dl.output_path.mkdir(parents=True, exist_ok=True)
 
             with open(dl.output_path / "other_events.json", "w", encoding="utf-8") as f:
-                json.dump(self.events_without_docs, f, ensure_ascii=False, indent=2)
+                json.dump(
+                    self._timeline_events_without_docs, f, ensure_ascii=False, indent=2
+                )
 
             with open(
                 dl.output_path / "events_with_documents.json", "w", encoding="utf-8"
             ) as f:
-                json.dump(self.events_with_docs, f, ensure_ascii=False, indent=2)
+                json.dump(
+                    self._timeline_events_with_docs, f, ensure_ascii=False, indent=2
+                )
 
             export_transactions(
                 dl.output_path / "other_events.json",
@@ -312,159 +293,3 @@ class Timeline:
             )
 
             dl.dl_docs()
-
-
-def export_transactions(input_path, output_path, lang="auto"):
-    """
-    Create a CSV file with the deposits and removals ready for importing into Portfolio Performance.
-
-    Args:
-        input_path: Path of a JSON file containing timeline events.
-        output_path: Target path of the CSV file to be written.
-        lang: Language of the created file. Defaults to "auto".
-    """
-
-    log = get_colored_logger(__name__)
-
-    if lang == "auto":
-        locale = getlocale()[0]
-
-        if locale is None:
-            lang = "en"
-
-        else:
-            lang = locale.split("_")[0]
-
-    if lang not in ["cs", "de", "en", "es", "fr", "it", "nl", "pt", "ru"]:
-        lang = "en"
-
-    # i18n source from Portfolio Performance:
-    # https://github.com/portfolio-performance/portfolio/blob/master/name.abuchen.portfolio/src/name/abuchen/portfolio/messages_de.properties
-    # https://github.com/portfolio-performance/portfolio/blob/master/name.abuchen.portfolio/src/name/abuchen/portfolio/model/labels_de.properties
-
-    i18n = {
-        "date": {
-            "cs": "Datum",
-            "de": "Datum",
-            "en": "Date",
-            "es": "Fecha",
-            "fr": "Date",
-            "it": "Data",
-            "nl": "Datum",
-            "pt": "Data",
-            "ru": "\u0414\u0430\u0442\u0430",
-        },
-        "type": {
-            "cs": "Typ",
-            "de": "Typ",
-            "en": "Type",
-            "es": "Tipo",
-            "fr": "Type",
-            "it": "Tipo",
-            "nl": "Type",
-            "pt": "Tipo",
-            "ru": "\u0422\u0438\u043F",
-        },
-        "value": {
-            "cs": "Hodnota",
-            "de": "Wert",
-            "en": "Value",
-            "es": "Valor",
-            "fr": "Valeur",
-            "it": "Valore",
-            "nl": "Waarde",
-            "pt": "Valor",
-            "ru": "\u0417\u043D\u0430\u0447\u0435\u043D\u0438\u0435",
-        },
-        "deposit": {
-            "cs": "Vklad",
-            "de": "Einlage",
-            "en": "Deposit",
-            "es": "Dep\u00F3sito",
-            "fr": "D\u00E9p\u00F4t",
-            "it": "Deposito",
-            "nl": "Storting",
-            "pt": "Dep\u00F3sito",
-            "ru": "\u041F\u043E\u043F\u043E\u043B\u043D\u0435\u043D\u0438\u0435",
-        },
-        "removal": {
-            "cs": "V\u00FDb\u011Br",
-            "de": "Entnahme",
-            "en": "Removal",
-            "es": "Removal",
-            "fr": "Retrait",
-            "it": "Prelievo",
-            "nl": "Opname",
-            "pt": "Levantamento",
-            "ru": "\u0421\u043F\u0438\u0441\u0430\u043D\u0438\u0435",
-        },
-    }
-
-    # Read relevant deposit timeline entries
-
-    with open(input_path, encoding="utf-8") as f:
-        timeline = json.load(f)
-
-    # Write deposit_transactions.csv file
-
-    # date, transaction, shares, amount, total, fee, isin, name
-
-    log.info("Write deposit entries")
-
-    with open(output_path, "w", encoding="utf-8") as f:
-        # f.write('Datum;Typ;Stück;amount;Wert;Gebühren;ISIN;name\n')
-
-        csv_fmt = "{date};{type};{value}\n"
-
-        header = csv_fmt.format(
-            date=i18n["date"][lang], type=i18n["type"][lang], value=i18n["value"][lang]
-        )
-
-        f.write(header)
-
-        for event in timeline:
-            event = event["data"]
-
-            date_time = datetime.fromtimestamp(int(event["timestamp"] / 1000))
-
-            date = date_time.strftime("%Y-%m-%d")
-
-            title = event["title"]
-
-            try:
-                body = event["body"]
-
-            except KeyError:
-                body = ""
-
-            if "storniert" in body:
-                continue
-
-            # Cash in
-
-            if title in ["Einzahlung", "Bonuszahlung"]:
-                f.write(
-                    csv_fmt.format(
-                        date=date,
-                        type=i18n["deposit"][lang],
-                        value=event["cashChangeAmount"],
-                    )
-                )
-
-            elif title == "Auszahlung":
-                f.write(
-                    csv_fmt.format(
-                        date=date,
-                        type=i18n["removal"][lang],
-                        value=abs(event["cashChangeAmount"]),
-                    )
-                )
-
-            # Dividend - Shares
-
-            elif title == "Reinvestierung":
-                # TODO: implement reinvestment export
-
-                log.warning("Detected reinvestment, skipping... (not implemented yet)")
-
-    log.info("Deposit creation finished!")
