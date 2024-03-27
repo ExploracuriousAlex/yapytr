@@ -1,6 +1,6 @@
 [project]
 name = "yapytr"
-version = "2024.3.27a1"
+version = "2024.3.27a2"
 authors = [
     {name = "ExploracuriousAlex"},
 ]
@@ -30,3 +30,7 @@ dependencies = [
 
 [project.scripts]
 yapytr = "yapytr.__main__:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["yapytr**"]
