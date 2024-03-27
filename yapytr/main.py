@@ -153,7 +153,7 @@ def create_arguments_parser():
         type=Path,
     )
     parser_export_transactions.add_argument(
-        "output", help="Output path of CSV file", metavar="OUTPUT", type=Path
+        "output", help="output path of CSV file", metavar="OUTPUT", type=Path
     )
     parser_export_transactions.add_argument(
         "-l",
@@ -179,12 +179,16 @@ def create_arguments_parser():
         description="Print overview of set price alarms.",
     )
 
-    sub_parsers.add_parser(
+    parser_portfolio = sub_parsers.add_parser(
         "portfolio",
         formatter_class=lambda prog: argparse.HelpFormatter(prog, max_help_position=30),
         parents=[sub_parser_common_login_args],
         help="print portfolio",
         description="Print the current Trade Republic portfolio.",
+    )
+
+    parser_portfolio.add_argument(
+        "-o", "--output", help="output path of CSV file", metavar="OUTPUT", type=Path
     )
 
     parser_set_price_alarm = sub_parsers.add_parser(
@@ -261,6 +265,8 @@ def main():
         portfolio = Portfolio(tra)
         portfolio.get_portfolio()
         portfolio.print_portfolio()
+        if args.output is not None:
+            portfolio.export_portfolio(args.output)
     elif args.command == "export_transactions":
         export_transactions(args.input, args.output, args.lang)
     elif args.command == "version":

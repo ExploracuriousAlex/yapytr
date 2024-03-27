@@ -2,8 +2,8 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "_pytr: yapytr -v debug",
-      "type": "python",
+      "name": "_yapytr: yapytr -v debug",
+      "type": "debugpy",
       "request": "launch",
       "module": "yapytr",
       "args": [
@@ -13,14 +13,14 @@
     },
     {
       "name": "_yapytr: yapytr",
-      "type": "python",
+      "type": "debugpy",
       "request": "launch",
       "module": "yapytr",
       "args": []
     },
     {
       "name": "_yapytr: yapytr -h",
-      "type": "python",
+      "type": "debugpy",
       "request": "launch",
       "module": "yapytr",
       "args": [
@@ -29,7 +29,7 @@
     },
     {
       "name": "account_info: yapytr -v debug account_info -h",
-      "type": "python",
+      "type": "debugpy",
       "request": "launch",
       "module": "yapytr",
       "args": [
@@ -41,7 +41,7 @@
     },
     {
       "name": "account_info: yapytr account_info",
-      "type": "python",
+      "type": "debugpy",
       "request": "launch",
       "module": "yapytr",
       "args": [
@@ -50,7 +50,7 @@
     },
     {
       "name": "account_info: yapytr account_info -h",
-      "type": "python",
+      "type": "debugpy",
       "request": "launch",
       "module": "yapytr",
       "args": [
@@ -60,7 +60,7 @@
     },
     {
       "name": "cancel_price_alarm: yapytr -v debug cancel_price_alarm [enter real id first!]",
-      "type": "python",
+      "type": "debugpy",
       "request": "launch",
       "module": "yapytr",
       "args": [
@@ -72,7 +72,7 @@
     },
     {
       "name": "cancel_price_alarm: yapytr cancel_price_alarm -h",
-      "type": "python",
+      "type": "debugpy",
       "request": "launch",
       "module": "yapytr",
       "args": [
@@ -82,7 +82,7 @@
     },
     {
       "name": "clean: yapytr -v debug clean",
-      "type": "python",
+      "type": "debugpy",
       "request": "launch",
       "module": "yapytr",
       "args": [
@@ -93,7 +93,7 @@
     },
     {
       "name": "clear: yapytr clean",
-      "type": "python",
+      "type": "debugpy",
       "request": "launch",
       "module": "yapytr",
       "args": [
@@ -102,7 +102,7 @@
     },
     {
       "name": "clear: yapytr clean -h",
-      "type": "python",
+      "type": "debugpy",
       "request": "launch",
       "module": "yapytr",
       "args": [
@@ -112,7 +112,7 @@
     },
     {
       "name": "completion: yapytr -v debug completion",
-      "type": "python",
+      "type": "debugpy",
       "request": "launch",
       "module": "yapytr",
       "args": [
@@ -123,7 +123,7 @@
     },
     {
       "name": "completion: yapytr completion",
-      "type": "python",
+      "type": "debugpy",
       "request": "launch",
       "module": "yapytr",
       "args": [
@@ -132,7 +132,7 @@
     },
     {
       "name": "completion: yapytr completion -h",
-      "type": "python",
+      "type": "debugpy",
       "request": "launch",
       "module": "yapytr",
       "args": [
@@ -142,7 +142,7 @@
     },
     {
       "name": "details: yapytr -v debug details",
-      "type": "python",
+      "type": "debugpy",
       "request": "launch",
       "module": "yapytr",
       "args": [
@@ -153,7 +153,7 @@
     },
     {
       "name": "details: yapytr -v debug details US0378331005",
-      "type": "python",
+      "type": "debugpy",
       "request": "launch",
       "module": "yapytr",
       "args": [
@@ -165,7 +165,7 @@
     },
     {
       "name": "details: yapytr details -h",
-      "type": "python",
+      "type": "debugpy",
       "request": "launch",
       "module": "yapytr",
       "args": [
@@ -175,7 +175,7 @@
     },
     {
       "name": "dl_docs: yapytr -v debug dl_docs doc_folder_debug",
-      "type": "python",
+      "type": "debugpy",
       "request": "launch",
       "module": "yapytr",
       "args": [
@@ -187,7 +187,7 @@
     },
     {
       "name": "dl_docs: yapytr -v debug dl_docs doc_folder_debug --last_days 2",
-      "type": "python",
+      "type": "debugpy",
       "request": "launch",
       "module": "yapytr",
       "args": [
@@ -201,7 +201,7 @@
     },
     {
       "name": "dl_docs: yapytr dl_docs -h",
-      "type": "python",
+      "type": "debugpy",
       "request": "launch",
       "module": "yapytr",
       "args": [
@@ -211,7 +211,7 @@
     },
     {
       "name": "dl_docs: yapytr dl_docs doc_folder",
-      "type": "python",
+      "type": "debugpy",
       "request": "launch",
       "module": "yapytr",
       "args": [
@@ -221,7 +221,7 @@
     },
     {
       "name": "dl_docs: yapytr dl_docs doc_folder --last_days 20",
-      "type": "python",
+      "type": "debugpy",
       "request": "launch",
       "module": "yapytr",
       "args": [
@@ -233,7 +233,7 @@
     },
     {
       "name": "login: yapytr -v debug login",
-      "type": "python",
+      "type": "debugpy",
       "request": "launch",
       "module": "yapytr",
       "args": [
@@ -244,7 +244,7 @@
     },
     {
       "name": "login: yapytr login -h",
-      "type": "python",
+      "type": "debugpy",
       "request": "launch",
       "module": "yapytr",
       "args": [
@@ -254,7 +254,7 @@
     },
     {
       "name": "portfolio: yapytr -v debug portfolio",
-      "type": "python",
+      "type": "debugpy",
       "request": "launch",
       "module": "yapytr",
       "args": [
@@ -264,8 +264,34 @@
       ]
     },
     {
+      "name": "portfolio: yapytr -v debug portfolio -o doc_folder\\portfolio.csv",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "yapytr",
+      "args": [
+        "-v",
+        "debug",
+        "portfolio",
+        "-o",
+        "doc_folder\\portfolio.csv"
+      ]
+    },
+    {
+      "name": "portfolio: yapytr -v debug portfolio --output doc_folder\\portfolio.csv",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "yapytr",
+      "args": [
+        "-v",
+        "debug",
+        "portfolio",
+        "--output",
+        "doc_folder\\portfolio.csv"
+      ]
+    },
+    {
       "name": "portfolio: yapytr portfolio -h",
-      "type": "python",
+      "type": "debugpy",
       "request": "launch",
       "module": "yapytr",
       "args": [
@@ -275,7 +301,7 @@
     },
     {
       "name": "print_price_alarms: yapytr -v debug print_price_alarms",
-      "type": "python",
+      "type": "debugpy",
       "request": "launch",
       "module": "yapytr",
       "args": [
@@ -286,7 +312,7 @@
     },
     {
       "name": "print_price_alarms: yapytr print_price_alarms -h",
-      "type": "python",
+      "type": "debugpy",
       "request": "launch",
       "module": "yapytr",
       "args": [
@@ -296,7 +322,7 @@
     },
     {
       "name": "set_price_alarm: yapytr -v debug set_price_alarm",
-      "type": "python",
+      "type": "debugpy",
       "request": "launch",
       "module": "yapytr",
       "args": [
@@ -307,7 +333,7 @@
     },
     {
       "name": "set_price_alarm: yapytr -v debug set_price_alarm US0378331005 100.54",
-      "type": "python",
+      "type": "debugpy",
       "request": "launch",
       "module": "yapytr",
       "args": [
@@ -320,7 +346,7 @@
     },
     {
       "name": "set_price_alarm: yapytr set_price_alarm -h",
-      "type": "python",
+      "type": "debugpy",
       "request": "launch",
       "module": "yapytr",
       "args": [
@@ -330,7 +356,7 @@
     },
     {
       "name": "version: yapytr -v debug version",
-      "type": "python",
+      "type": "debugpy",
       "request": "launch",
       "module": "yapytr",
       "args": [
@@ -341,7 +367,7 @@
     },
     {
       "name": "version: yapytr version -h",
-      "type": "python",
+      "type": "debugpy",
       "request": "launch",
       "module": "yapytr",
       "args": [

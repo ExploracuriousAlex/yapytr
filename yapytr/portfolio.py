@@ -1,6 +1,7 @@
 """
 A Portfolio class.
 """
+
 import asyncio
 from .utils import json_preview, get_colored_logger
 
@@ -177,6 +178,47 @@ class Portfolio:
         currency = self._cash[0]["currencyId"]
         print(f"Cash {currency} {cash:>40.2f} -> {cash:>10.2f}")
         print(f"Total {cash+total_buy_cost:>43.2f} -> {cash+total_net_value:>10.2f}")
+
+    def export_portfolio(self, output_path):
+        """
+        Write the portfolio to file.
+
+        Write the portfolio to a *.csv file.
+
+        Args:
+            output_path: The full path of the *.csv file to be written.
+        """
+        positions = self._compact_portfolio["positions"]
+        csv_lines = []
+        csv_lines.append(
+            "Name;ISIN;average buying costs;quantity;total buying costs;netValue;diff;diff in percent"
+        )
+
+        for pos in sorted(positions, key=lambda x: x["netSize"], reverse=True):
+            csv_lines.append(
+                f"{pos['name']};{pos['instrumentId']};{float(pos['averageBuyIn']):.2f};{float(pos['netValue']):.2f}"
+            )
+
+        for pos in sorted(positions, key=lambda x: float(x["netSize"]), reverse=True):
+            buy_cost = float(pos["averageBuyIn"]) * float(pos["netSize"])
+            diff = float(pos["netValue"]) - buy_cost
+            if buy_cost == 0:
+                diff_in_percent = 0.0
+            else:
+                diff_in_percent = ((pos["netValue"] / buy_cost) - 1) * 100
+
+            csv_lines.append(
+                f"{pos['name']};{pos['instrumentId']};"
+                + f"{float(pos['averageBuyIn']):.2f};{float(pos['netSize']):.2f};"
+                + f"{float(buy_cost):>.2f};{float(pos['netValue']):.2f};"
+                + f"{diff:.2f};{diff_in_percent:.1f}%"
+            )
+
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(output_path, "w", encoding="utf-8") as f:
+            f.write("\n".join(csv_lines))
+
+        self._log.info("Wrote %s lines to %s.", len(csv_lines), output_path)
 
     def get_portfolio(self):
         """
