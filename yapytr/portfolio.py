@@ -149,7 +149,7 @@ class Portfolio:
 
             print(
                 f"{pos['name']:<25.25} {pos['instrumentId']:>12} "
-                + f"{float(pos['averageBuyIn']):>10.2f} * {float(pos['netSize']):>10.2f}"
+                + f"{float(pos['averageBuyIn']):>10.2f} * {float(pos['netSize']):>10.3f}"
                 + f" = {float(buy_cost):>10.2f} -> {float(pos['netValue']):>10.2f} "
                 + f"{diff:>10.2f} {diff_in_percent:>7.1f}%"
             )
@@ -209,7 +209,7 @@ class Portfolio:
 
             csv_lines.append(
                 f"{pos['name']};{pos['instrumentId']};"
-                + f"{float(pos['averageBuyIn']):.2f};{float(pos['netSize']):.2f};"
+                + f"{float(pos['averageBuyIn']):.2f};{float(pos['netSize']):.3f};"
                 + f"{float(buy_cost):>.2f};{float(pos['netValue']):.2f};"
                 + f"{diff:.2f};{diff_in_percent:.1f}%"
             )
