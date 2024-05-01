@@ -191,13 +191,9 @@ class Portfolio:
         positions = self._compact_portfolio["positions"]
         csv_lines = []
         csv_lines.append(
-            "Name;ISIN;average buying costs;quantity;total buying costs;netValue;diff;diff in percent"
+            "Name;ISIN;average buying costs;quantity;total buying costs;"
+            + "netValue;diff;diff in percent"
         )
-
-        for pos in sorted(positions, key=lambda x: x["netSize"], reverse=True):
-            csv_lines.append(
-                f"{pos['name']};{pos['instrumentId']};{float(pos['averageBuyIn']):.2f};{float(pos['netValue']):.2f}"
-            )
 
         for pos in sorted(positions, key=lambda x: float(x["netSize"]), reverse=True):
             buy_cost = float(pos["averageBuyIn"]) * float(pos["netSize"])

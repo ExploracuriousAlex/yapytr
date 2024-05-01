@@ -66,8 +66,20 @@ class TradeRepublicApi:
     _previous_responses = {}
     subscriptions = {}
 
+    _credentials_file = CREDENTIALS_FILE
+    _cookies_file = COOKIES_FILE
+
     @property
     def session_token(self):
+        """
+        Retrieves the session token.
+
+        If the refresh token is not set, it calls the login method to obtain the session token.
+        If the refresh token is set and the session token has expired, it calls the refresh_access_token method to obtain a new session token.
+
+        Returns:
+            The session token.
+        """
         if not self._refresh_token:
             self.login()
         elif self._refresh_token and time.time() > self._session_token_expires_at:
@@ -80,20 +92,35 @@ class TradeRepublicApi:
         self._session_token = val
 
     def __init__(
-        self, phone_no=None, pin=None, keyfile=None, locale="de", save_cookies=False
+        self,
+        phone_no=None,
+        pin=None,
+        keyfile=None,
+        locale="de",
+        save_cookies=False,
+        credentials_file=None,
+        cookies_file=None,
     ):
         self.log = get_colored_logger(__name__)
         self._locale = locale
         self._save_cookies = save_cookies
+
+        self._credentials_file = (
+            pathlib.Path(credentials_file) if credentials_file else CREDENTIALS_FILE
+        )
+        self._cookies_file = (
+            pathlib.Path(cookies_file) if cookies_file else COOKIES_FILE
+        )
+
         if not (phone_no and pin):
             try:
-                with open(CREDENTIALS_FILE, "r") as f:
+                with open(self._credentials_file, "r", encoding="utf-8") as f:
                     lines = f.readlines()
                 self.phone_no = lines[0].strip()
                 self.pin = lines[1].strip()
             except FileNotFoundError:
                 raise ValueError(
-                    f"phone_no and pin must be specified explicitly or via {CREDENTIALS_FILE}"
+                    f"phone_no and pin must be specified explicitly or via {self._credentials_file}"
                 )
         else:
             self.phone_no = phone_no
@@ -109,7 +136,7 @@ class TradeRepublicApi:
         self._websession = requests.Session()
         self._websession.headers = self._default_headers_web
         if self._save_cookies:
-            self._websession.cookies = MozillaCookieJar(COOKIES_FILE)
+            self._websession.cookies = MozillaCookieJar(self._cookies_file)
 
     def initiate_device_reset(self):
         self.sk = SigningKey.generate(curve=NIST256p, hashfunc=hashlib.sha512)
@@ -118,6 +145,7 @@ class TradeRepublicApi:
             f"{self._host}/api/v1/auth/account/reset/device",
             json={"phoneNumber": self.phone_no, "pin": self.pin},
             headers=self._default_headers,
+            timeout=10,
         )
 
         self._process_id = r.json()["processId"]
@@ -133,6 +161,7 @@ class TradeRepublicApi:
             f"{self._host}/api/v1/auth/account/reset/device/{self._process_id}/key",
             json={"code": token, "deviceKey": pubkey_string},
             headers=self._default_headers,
+            timeout=10,
         )
         if r.status_code == 200:
             with open(self.keyfile, "wb") as f:
@@ -181,6 +210,7 @@ class TradeRepublicApi:
             url=f"{self._host}{url_path}",
             data=payload_string,
             headers=headers,
+            timeout=10,
         )
 
     def inititate_weblogin(self):
@@ -231,7 +261,7 @@ class TradeRepublicApi:
             return False
 
         # Only attempt to load if the cookie file exists.
-        if COOKIES_FILE.exists():
+        if self._cookies_file.exists():
             # Loads session cookies too (expirydate=0).
             self._websession.cookies.load(ignore_discard=True, ignore_expires=True)
             self._weblogin = True
@@ -355,7 +385,7 @@ class TradeRepublicApi:
 
             elif code == "D":
                 response = self._calculate_delta(subscription_id, payload_str)
-                self.log.debug(f"Payload is {response}")
+                self.log.debug("Payload is %s", response)
 
                 self._previous_responses[subscription_id] = response
                 return subscription_id, subscription, json.loads(response)
@@ -366,7 +396,7 @@ class TradeRepublicApi:
                 continue
 
             elif code == "E":
-                self.log.error(f"Received error message: {response!r}")
+                self.log.error("Received error message: %r", response)
 
                 await self.unsubscribe(subscription_id)
 
@@ -792,6 +822,14 @@ class TradeRepublicApi:
 
 
 class TradeRepublicError(ValueError):
+    """Exception raised for errors related to Trade Republic API.
+
+    Attributes:
+        subscription_id -- the ID of the subscription
+        subscription -- the subscription object
+        error -- the error message
+    """
+
     def __init__(self, subscription_id, subscription, error_message):
         self.subscription_id = subscription_id
         self.subscription = subscription

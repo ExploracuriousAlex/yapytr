@@ -1,6 +1,6 @@
 [project]
 name = "yapytr"
-version = "2024.3.27a3"
+version = "2024.5.1a3"
 authors = [
     {name = "ExploracuriousAlex"},
 ]

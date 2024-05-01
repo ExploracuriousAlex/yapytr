@@ -1,8 +1,7 @@
+#!/usr/bin/env python
 """
 Yapytr main module.
 """
-
-#!/usr/bin/env python
 import argparse
 import time
 from pathlib import Path
